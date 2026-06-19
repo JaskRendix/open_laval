@@ -21,6 +21,11 @@ def make_cfg(
     name="test_blade",
     save_fig=False,
     save_excel=False,
+    asymmetric=False,
+    vl_lower=None,
+    vl_upper=None,
+    vu_lower=None,
+    vu_upper=None,
 ):
     # Compute valid Prandtl–Meyer range
     nu_in = prandtl_meyer(mach_in, gamma)
@@ -28,13 +33,13 @@ def make_cfg(
     nu_min = min(nu_in, nu_out)
     nu_max = max(nu_in, nu_out)
 
-    # If vl/vu not provided, choose safe defaults inside the valid range
+    # Default symmetric values
     if vl is None:
         vl = nu_min + 0.1 * (nu_max - nu_min)
     if vu is None:
         vu = nu_min + 0.6 * (nu_max - nu_min)
 
-    # Clamp to valid range (just in case)
+    # Clamp to valid range
     vl = max(nu_min + 1e-6, min(vl, nu_max - 1e-6))
     vu = max(vl + 1e-6, min(vu, nu_max - 1e-6))
 
@@ -51,6 +56,11 @@ def make_cfg(
         num_points=num_points,
         save_fig=save_fig,
         save_excel=save_excel,
+        asymmetric=asymmetric,
+        vl_lower=vl_lower,
+        vl_upper=vl_upper,
+        vu_lower=vu_lower,
+        vu_upper=vu_upper,
     )
 
 
@@ -188,4 +198,80 @@ def test_blade_full_pipeline_param_angles(vl, vu):
     cfg = make_cfg(vl=vl, vu=vu)
     blade = Blade(cfg)
     result = blade.compute()
+    assert np.isfinite(result["solidity"])
+
+
+def test_asymmetric_valid_pm_angles():
+    # Valid PM range for mach_in=2.0, mach_out=1.5, gamma=1.4:
+    # ν_min ≈ 11.91°, ν_max ≈ 26.38°
+    cfg = make_cfg(
+        asymmetric=True,
+        vl_lower=13.0,
+        vl_upper=14.0,
+        vu_lower=20.0,
+        vu_upper=22.0,
+    )
+    c = BladeConfig(**cfg.model_dump())
+    assert c.asymmetric is True
+    assert c.vl_lower == 13.0
+    assert c.vl_upper == 14.0
+    assert c.vu_lower == 20.0
+    assert c.vu_upper == 22.0
+
+
+def test_asymmetric_invalid_pm_angles_rejected():
+    # vl_lower < ν_min → invalid
+    with pytest.raises(ValueError):
+        make_cfg(
+            asymmetric=True,
+            vl_lower=5.0,  # invalid
+            vl_upper=14.0,
+            vu_lower=20.0,
+            vu_upper=22.0,
+        )
+
+
+def test_asymmetric_flow_relations_rstar_differs():
+    cfg = make_cfg(
+        asymmetric=True,
+        vl_lower=13.0,
+        vl_upper=14.0,
+        vu_lower=20.0,
+        vu_upper=22.0,
+    )
+    blade = Blade(cfg)
+    blade.compute_flow_relations()
+
+    assert blade.Rstar_lower != blade.Rstar_upper
+    assert 0 < blade.Rstar_lower < 1
+    assert 0 < blade.Rstar_upper < 1
+
+
+def test_asymmetric_geometry_differs():
+    cfg = make_cfg(
+        asymmetric=True,
+        vl_lower=13.0,
+        vl_upper=14.0,
+        vu_lower=20.0,
+        vu_upper=22.0,
+    )
+    blade = Blade(cfg)
+    blade.compute()
+
+    # Geometry must differ
+    assert not np.allclose(blade.lower_interp, blade.upper_interp)
+
+
+def test_asymmetric_pipeline_runs():
+    cfg = make_cfg(
+        asymmetric=True,
+        vl_lower=12.5,
+        vl_upper=13.5,
+        vu_lower=19.0,
+        vu_upper=21.0,
+    )
+    blade = Blade(cfg)
+    result = blade.compute()
+
+    assert result["x"].size == cfg.num_points
     assert np.isfinite(result["solidity"])

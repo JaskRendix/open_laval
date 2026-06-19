@@ -1,8 +1,8 @@
 import json
-import tomllib
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import tomllib
 from typer.testing import CliRunner
 
 from openlaval.cli import app
@@ -178,7 +178,8 @@ def test_cli_run_invalid_toml(tmp_path):
 
 def test_cli_run_invalid_config(tmp_path):
     path = tmp_path / "invalid_config.toml"
-    path.write_text("""
+    path.write_text(
+        """
 [config]
 name = "bad"
 save_fig = false
@@ -196,7 +197,8 @@ vl = 50.0   # invalid: vl > vu
 [edge]
 delta = 5.0
 offset = 0.1
-""")
+"""
+    )
 
     result = runner.invoke(app, ["run", str(path)])
 
@@ -206,7 +208,8 @@ offset = 0.1
 
 def test_cli_plot_invalid_config(tmp_path):
     path = tmp_path / "invalid_plot.toml"
-    path.write_text("""
+    path.write_text(
+        """
 [config]
 name = "bad"
 save_fig = false
@@ -224,7 +227,8 @@ vl = 50.0
 [edge]
 delta = 5.0
 offset = 0.1
-""")
+"""
+    )
 
     result = runner.invoke(app, ["plot", str(path)])
 
@@ -234,7 +238,8 @@ offset = 0.1
 
 def test_cli_export_invalid_config(tmp_path):
     path = tmp_path / "invalid_export.toml"
-    path.write_text("""
+    path.write_text(
+        """
 [config]
 name = "bad"
 save_fig = false
@@ -252,7 +257,8 @@ vl = 50.0
 [edge]
 delta = 5.0
 offset = 0.1
-""")
+"""
+    )
 
     result = runner.invoke(app, ["export", str(path), "--outdir", str(tmp_path)])
 

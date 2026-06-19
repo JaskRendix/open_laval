@@ -17,7 +17,7 @@ from .physics import mach_after_edge, prandtl_meyer
 
 class Blade:
     """
-    High-level blade generator.
+    High-level blade generator with full asymmetric PM-angle support.
     """
 
     def __init__(self, cfg: BladeConfig):
@@ -39,10 +39,7 @@ class Blade:
     def compute_flow_relations(self) -> None:
         c = self.cfg
 
-        # Copy raw config parameters
         self.gamma = c.gamma
-        self.vl = c.vl
-        self.vu = c.vu
         self.beta_in = c.beta_in
 
         # Mach after leading-edge expansion
@@ -51,6 +48,20 @@ class Blade:
         # Prandtl–Meyer angles
         self.nu_in = prandtl_meyer(c.mach_in, c.gamma)
         self.nu_out = prandtl_meyer(c.mach_out, c.gamma)
+
+        # Symmetric fallback
+        vl = c.vl
+        vu = c.vu
+
+        # Asymmetric override
+        if c.asymmetric:
+            self.vl_lower = c.vl_lower if c.vl_lower is not None else vl
+            self.vl_upper = c.vl_upper if c.vl_upper is not None else vl
+            self.vu_lower = c.vu_lower if c.vu_lower is not None else vu
+            self.vu_upper = c.vu_upper if c.vu_upper is not None else vu
+        else:
+            self.vl_lower = self.vl_upper = vl
+            self.vu_lower = self.vu_upper = vu
 
         # Compute outlet flow angle (beta_out)
         b1 = 1 + (c.gamma - 1) / 2 * (c.mach_out**2)
@@ -62,51 +73,51 @@ class Blade:
         )
         self.beta_out = np.rad2deg(beta_out_rad)
 
-        # R* values for upper/lower surfaces
+        # Asymmetric R*
         self.Rstar_upper = solve_Rstar_intersection(
-            -c.vu, c.vu, c.gamma, phi_const=0.0
+            -self.vu_upper, self.vu_upper, c.gamma, phi_const=0.0
         )[0]
         self.Rstar_lower = solve_Rstar_intersection(
-            -c.vl, c.vl, c.gamma, phi_const=0.0
+            -self.vl_lower, self.vl_lower, c.gamma, phi_const=0.0
         )[0]
 
     def generate_geometry(self) -> None:
         c = self.cfg
 
-        # 2.1 Circular arcs
+        # 2.1 Circular arcs (asymmetric)
         lower_arc_x, lower_arc_y = circular_arc(
             self.Rstar_lower,
-            90 + (self.beta_in - (self.nu_in - self.vl)),
-            90 + (self.beta_out + (self.nu_out - self.vl)),
+            90 + (self.beta_in - (self.nu_in - self.vl_lower)),
+            90 + (self.beta_out + (self.nu_out - self.vl_lower)),
         )
 
         upper_arc_x, upper_arc_y = circular_arc(
             self.Rstar_upper,
-            90 + (self.beta_in - (self.vu - self.nu_in)),
-            90 + (self.beta_out + (self.vu - self.nu_out)),
+            90 + (self.beta_in - (self.vu_upper - self.nu_in)),
+            90 + (self.beta_out + (self.vu_upper - self.nu_out)),
         )
 
-        # 2.2 Lower concave transitions
+        # 2.2 Lower concave transitions (asymmetric)
         lc_in_x, lc_in_y = lower_concave_transition(
-            self.Rstar_lower, self.vl, self.nu_in, self.gamma, self.beta_in
+            self.Rstar_lower, self.vl_lower, self.nu_in, self.gamma, self.beta_in
         )
         lc_out_x, lc_out_y = lower_concave_transition(
-            self.Rstar_lower, self.vl, self.nu_out, self.gamma, self.beta_out
+            self.Rstar_lower, self.vl_lower, self.nu_out, self.gamma, self.beta_out
         )
 
-        # 2.3 Upper convex transitions
+        # 2.3 Upper convex transitions (asymmetric)
         uc_in_x, uc_in_y = upper_convex_transition(
-            self.Rstar_upper, self.vu, self.beta_in, self.gamma, direction="in"
+            self.Rstar_upper, self.vu_upper, self.beta_in, self.gamma, direction="in"
         )
         uc_out_x, uc_out_y = upper_convex_transition(
-            self.Rstar_upper, self.vu, self.beta_out, self.gamma, direction="out"
+            self.Rstar_upper, self.vu_upper, self.beta_out, self.gamma, direction="out"
         )
 
         # Helpers
         def _safe_last(arr: np.ndarray, fallback: float) -> float:
             return arr[-1] if arr.size > 0 else fallback
 
-        # Safe endpoints for leading edge and trailing edge
+        # Safe endpoints
         lc_in_last_x = _safe_last(lc_in_x, lower_arc_x[0])
         lc_in_last_y = _safe_last(lc_in_y, lower_arc_y[0])
         lc_out_last_x = _safe_last(lc_out_x, lower_arc_x[-1])

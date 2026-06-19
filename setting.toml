@@ -13,10 +13,19 @@ mach_out = 3.0
 
 beta_in  = 70
 
-# Must satisfy: ν_in ≤ vl < vu ≤ ν_out
-# ν_in ≈ 39.12°, ν_out ≈ 49.76°
-vl = 40.0
+Wvl = 40.0
 vu = 48.0
+
+# --- Asymmetric mode (optional) ---
+# Set this to true to activate asymmetric PM angles
+asymmetric = false
+
+# Optional asymmetric overrides:
+# If omitted, symmetric vl/vu are used.
+# vl_lower = 40.0
+# vl_upper = 41.5
+# vu_lower = 47.0
+# vu_upper = 49.0
 
 [edge]
 delta  = 8

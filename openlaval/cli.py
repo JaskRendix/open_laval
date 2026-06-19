@@ -29,11 +29,48 @@ def _safe_compute_blade(cfg):
 
 
 @app.command()
-def run(settings: str) -> None:
+def run(
+    settings: str,
+    asymmetric: bool = typer.Option(
+        None,
+        help="Enable asymmetric blade mode (overrides config).",
+    ),
+    vl_lower: float = typer.Option(
+        None,
+        help="Lower-surface vl (overrides config).",
+    ),
+    vl_upper: float = typer.Option(
+        None,
+        help="Upper-surface vl (overrides config).",
+    ),
+    vu_lower: float = typer.Option(
+        None,
+        help="Lower-surface vu (overrides config).",
+    ),
+    vu_upper: float = typer.Option(
+        None,
+        help="Upper-surface vu (overrides config).",
+    ),
+):
     """
     Compute blade geometry from a settings file.
     """
     cfg = _safe_load_config(settings)
+
+    # Override asymmetric mode
+    if asymmetric is not None:
+        cfg.asymmetric = asymmetric
+
+    # Override asymmetric PM angles
+    if vl_lower is not None:
+        cfg.vl_lower = vl_lower
+    if vl_upper is not None:
+        cfg.vl_upper = vl_upper
+    if vu_lower is not None:
+        cfg.vu_lower = vu_lower
+    if vu_upper is not None:
+        cfg.vu_upper = vu_upper
+
     blade, result = _safe_compute_blade(cfg)
 
     typer.echo(f"Computed blade: {cfg.name}")
@@ -41,11 +78,33 @@ def run(settings: str) -> None:
 
 
 @app.command()
-def plot(settings: str) -> None:
+def plot(
+    settings: str,
+    asymmetric: bool = typer.Option(
+        None,
+        help="Enable asymmetric blade mode (overrides config).",
+    ),
+    vl_lower: float = typer.Option(None),
+    vl_upper: float = typer.Option(None),
+    vu_lower: float = typer.Option(None),
+    vu_upper: float = typer.Option(None),
+):
     """
     Plot blade contour from a settings file.
     """
     cfg = _safe_load_config(settings)
+
+    if asymmetric is not None:
+        cfg.asymmetric = asymmetric
+    if vl_lower is not None:
+        cfg.vl_lower = vl_lower
+    if vl_upper is not None:
+        cfg.vl_upper = vl_upper
+    if vu_lower is not None:
+        cfg.vu_lower = vu_lower
+    if vu_upper is not None:
+        cfg.vu_upper = vu_upper
+
     blade, result = _safe_compute_blade(cfg)
 
     try:
@@ -61,11 +120,34 @@ def plot(settings: str) -> None:
 
 
 @app.command()
-def export(settings: str, outdir: str = "result") -> None:
+def export(
+    settings: str,
+    outdir: str = "result",
+    asymmetric: bool = typer.Option(
+        None,
+        help="Enable asymmetric blade mode (overrides config).",
+    ),
+    vl_lower: float = typer.Option(None),
+    vl_upper: float = typer.Option(None),
+    vu_lower: float = typer.Option(None),
+    vu_upper: float = typer.Option(None),
+):
     """
     Export blade geometry and metadata to disk.
     """
     cfg = _safe_load_config(settings)
+
+    if asymmetric is not None:
+        cfg.asymmetric = asymmetric
+    if vl_lower is not None:
+        cfg.vl_lower = vl_lower
+    if vl_upper is not None:
+        cfg.vl_upper = vl_upper
+    if vu_lower is not None:
+        cfg.vu_lower = vu_lower
+    if vu_upper is not None:
+        cfg.vu_upper = vu_upper
+
     blade, result = _safe_compute_blade(cfg)
 
     metadata = {
@@ -74,6 +156,11 @@ def export(settings: str, outdir: str = "result") -> None:
         "mach_in": cfg.mach_in,
         "mach_out": cfg.mach_out,
         "solidity": result["solidity"],
+        "asymmetric": cfg.asymmetric,
+        "vl_lower": cfg.vl_lower,
+        "vl_upper": cfg.vl_upper,
+        "vu_lower": cfg.vu_lower,
+        "vu_upper": cfg.vu_upper,
     }
 
     try:

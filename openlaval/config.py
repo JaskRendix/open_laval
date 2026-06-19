@@ -1,7 +1,7 @@
 import math
-import tomllib
 from pathlib import Path
 
+import tomllib
 from pydantic import BaseModel, Field, model_validator
 
 from openlaval.physics import phi_Rstar, prandtl_meyer
@@ -19,8 +19,19 @@ class BladeConfig(BaseModel):
     mach_in: float = Field(gt=1.0)
     mach_out: float = Field(gt=1.0)
     beta_in: float
+
+    # Symmetric Prandtl–Meyer angles (fallback)
     vu: float
     vl: float
+
+    # Asymmetric Prandtl–Meyer angles (optional)
+    vl_lower: float | None = None
+    vl_upper: float | None = None
+    vu_lower: float | None = None
+    vu_upper: float | None = None
+
+    # Enable asymmetric mode
+    asymmetric: bool = False
 
     # [edge]
     edge_delta: float = Field(ge=0.0)
@@ -34,12 +45,37 @@ class BladeConfig(BaseModel):
         nu_min = min(nu_in, nu_out)
         nu_max = max(nu_in, nu_out)
 
-        # vl, vu must lie between ν_in and ν_out
-        if not (nu_min <= self.vl < self.vu <= nu_max):
+        # --- Symmetric validation ---
+        if not self.asymmetric:
+            if not (nu_min <= self.vl < self.vu <= nu_max):
+                raise ValueError(
+                    f"Invalid Prandtl–Meyer angles:\n"
+                    f"Expected: ν_min ≤ vl < vu ≤ ν_max\n"
+                    f"Given: vl={self.vl}, vu={self.vu}, "
+                    f"ν_in={nu_in:.2f}, ν_out={nu_out:.2f}"
+                )
+            return self
+
+        # --- Asymmetric validation ---
+        # Fallback to symmetric values if not provided
+        vl_lower = self.vl_lower if self.vl_lower is not None else self.vl
+        vl_upper = self.vl_upper if self.vl_upper is not None else self.vl
+        vu_lower = self.vu_lower if self.vu_lower is not None else self.vu
+        vu_upper = self.vu_upper if self.vu_upper is not None else self.vu
+
+        # Lower surface: vl_lower < vu_lower
+        if not (nu_min <= vl_lower < vu_lower <= nu_max):
             raise ValueError(
-                f"Invalid Prandtl–Meyer angles:\n"
-                f"Expected: ν_min ≤ vl < vu ≤ ν_max\n"
-                f"Given: vl={self.vl}, vu={self.vu}, "
+                f"Asymmetric lower-surface PM angles invalid:\n"
+                f"vl_lower={vl_lower}, vu_lower={vu_lower}, "
+                f"ν_in={nu_in:.2f}, ν_out={nu_out:.2f}"
+            )
+
+        # Upper surface: vl_upper < vu_upper
+        if not (nu_min <= vl_upper < vu_upper <= nu_max):
+            raise ValueError(
+                f"Asymmetric upper-surface PM angles invalid:\n"
+                f"vl_upper={vl_upper}, vu_upper={vu_upper}, "
                 f"ν_in={nu_in:.2f}, ν_out={nu_out:.2f}"
             )
 
@@ -72,6 +108,11 @@ def load_config(path: str | Path) -> BladeConfig:
         beta_in=t["beta_in"],
         vu=t["vu"],
         vl=t["vl"],
+        vl_lower=t.get("vl_lower"),
+        vl_upper=t.get("vl_upper"),
+        vu_lower=t.get("vu_lower"),
+        vu_upper=t.get("vu_upper"),
+        asymmetric=t.get("asymmetric", False),
         edge_delta=e["delta"],
         edge_offset=e["offset"],
     )
