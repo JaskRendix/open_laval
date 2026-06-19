@@ -12,12 +12,12 @@ This repository is a refactored and modular version of the original project publ
 
 - Supersonic impulse turbine blade design based on Prandtl–Meyer expansion theory  
 - Method of characteristics for upper and lower surface construction  
-- Circular arcs, concave and convex transition regions, and leading‑edge shaping  
+- Circular arcs, concave/convex transitions, and leading‑edge shaping  
 - Interpolated blade contour suitable for CAD or CFD preprocessing  
 - Export of geometry and metadata  
-- Plotting of contours and Prandtl–Meyer diagrams  
-- Configuration through a simple `setting.toml` file  
-- asymmetric blade support  
+- Plotting of contours and Prandtl–Meyer diagrams (headless‑safe)  
+- Configuration through a simple `example.toml` file  
+- Asymmetric blade support  
 
 ---
 
@@ -25,7 +25,7 @@ This repository is a refactored and modular version of the original project publ
 
 OpenLaval requires Python 3.12 or newer.
 
-Install the package in editable mode:
+Install in editable mode:
 
 ```
 pip install -e .
@@ -37,30 +37,42 @@ This installs the `openlaval` CLI.
 
 ## Usage
 
-Prepare a configuration file:
+Prepare a configuration file, for example:
 
 ```
-setting.toml
+example.toml
 ```
 
-Then run one of the CLI commands.
+You may also store multiple configurations under a directory such as `configs/`:
+
+```
+configs/example.toml
+configs/asymmetric.toml
+configs/high_mach.toml
+```
 
 ### Compute geometry
 
 ```
-openlaval run setting.toml
+openlaval run configs/example.toml
 ```
 
 ### Plot the blade contour
 
 ```
-openlaval plot setting.toml
+openlaval plot configs/example.toml
+```
+
+If `save_fig = true` in the configuration, the plot is saved automatically to:
+
+```
+result/<name>_contour.png
 ```
 
 ### Export geometry and metadata
 
 ```
-openlaval export setting.toml --outdir result/
+openlaval export example.toml --outdir result/
 ```
 
 All output files are written to the chosen directory.
@@ -74,12 +86,12 @@ The configuration file defines:
 - specific heat ratio  
 - inlet and outlet Mach numbers  
 - inlet flow angle  
-- upper and lower Prandtl–Meyer angles  
+- upper and lower Prandtl–Meyer angles (symmetric or asymmetric)  
 - leading‑edge adjustment parameters  
 - number of interpolation points  
-- output options  
+- output options (`save_fig`, `save_excel`)  
 
-See `setting.toml` for an example.
+See `example.toml` for an example.
 
 ---
 
@@ -100,6 +112,7 @@ OpenLaval implements the design methods described in the following reports:
 The refactored version provides a modular structure suitable for extension.
 
 Possible future additions:
-- improved evaluation functions
-- additional export formats
-- validation against published cascade data
+
+- improved evaluation functions  
+- additional export formats  
+- validation against published cascade data  

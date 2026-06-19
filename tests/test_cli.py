@@ -54,7 +54,7 @@ delta = {cfg['edge']['delta']}
 offset = {cfg['edge']['offset']}
 """.strip()
 
-    path = tmp_path / "setting.toml"
+    path = tmp_path / "example.toml"
     path.write_text(toml_text)
     return path
 

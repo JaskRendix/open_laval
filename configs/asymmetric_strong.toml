@@ -1,0 +1,33 @@
+[config]
+name       = "asymmetric_strong"
+save_fig   = true
+save_excel = true
+num_points = 200
+
+[turbine_blade]
+gamma    = 1.4
+
+mach_in  = 2.5
+mach_out = 3.0
+
+beta_in  = 70
+
+# Symmetric fallback
+vl = 40.0
+vu = 48.0
+
+# Enable asymmetric mode
+asymmetric = true
+
+# --- Strong asymmetric PM angles ---
+# Suction side (lower): MUCH stronger turning
+vl_lower = 41.8
+vu_lower = 49.4
+
+# Pressure side (upper): MUCH weaker turning
+vl_upper = 39.3
+vu_upper = 46.2
+
+[edge]
+delta  = 8
+offset = 0.1

@@ -1,0 +1,34 @@
+[config]
+name       = "asymmetric_strong_lower"
+save_fig   = true
+save_excel = true
+num_points = 200
+
+[turbine_blade]
+gamma    = 1.4
+
+# Real expansion
+mach_in  = 2.5
+mach_out = 3.0
+
+beta_in  = 70
+
+# Symmetric fallback
+vl = 40.0
+vu = 48.0
+
+# Enable asymmetric mode
+asymmetric = true
+
+# --- Fully asymmetric PM angles ---
+# Lower surface (suction side): stronger expansion
+vl_lower = 41.2
+vu_lower = 48.9
+
+# Upper surface (pressure side): weaker expansion
+vl_upper = 39.5
+vu_upper = 47.2
+
+[edge]
+delta  = 8
+offset = 0.1

@@ -1,19 +1,29 @@
+from pathlib import Path
+
 import typer
 
-from .blade import Blade
+from .blade import Blade, BladeConfig
 from .config import load_config
 from .io import save_all_results
-from .plotting import plot_interpolated_contour
+from .plotting import (
+    plot_characteristics,
+    plot_contour,
+    plot_interpolated_contour,
+    plot_prandtl_meyer,
+)
 
 app = typer.Typer(help="OpenLaval — Supersonic Impulse Turbine Blade Generator")
 
 
-def _safe_load_config(path: str):
-    try:
-        return load_config(path)
-    except FileNotFoundError:
-        typer.echo(f"Error: configuration file not found: {path}")
+def _safe_load_config(path: str) -> BladeConfig:
+    p = Path(path).expanduser().resolve()
+
+    if not p.exists():
+        typer.echo(f"Error: configuration file not found: {p}")
         raise typer.Exit(code=1)
+
+    try:
+        return load_config(str(p))
     except Exception as e:
         typer.echo(f"Error loading configuration: {e}")
         raise typer.Exit(code=1)
@@ -107,6 +117,13 @@ def plot(
 
     blade, result = _safe_compute_blade(cfg)
 
+    print("Lower surface (interp):")
+    print(result["lower"][:10])
+    print("Upper surface (interp):")
+    print(result["upper"][:10])
+    print("Difference (upper - lower):")
+    print((result["upper"] - result["lower"])[:10])
+
     try:
         plot_interpolated_contour(
             result["x"],
@@ -117,6 +134,113 @@ def plot(
         )
     except Exception as e:
         typer.echo(f"Error plotting blade: {e}")
+        raise typer.Exit(code=1)
+
+
+@app.command("plot-raw")
+def plot_raw(
+    settings: str,
+    asymmetric: bool = typer.Option(None),
+    vl_lower: float = typer.Option(None),
+    vl_upper: float = typer.Option(None),
+    vu_lower: float = typer.Option(None),
+    vu_upper: float = typer.Option(None),
+):
+    """
+    Plot raw blade geometry (no interpolation).
+    """
+    cfg = _safe_load_config(settings)
+
+    if asymmetric is not None:
+        cfg.asymmetric = asymmetric
+    if vl_lower is not None:
+        cfg.vl_lower = vl_lower
+    if vl_upper is not None:
+        cfg.vl_upper = vl_upper
+    if vu_lower is not None:
+        cfg.vu_lower = vu_lower
+    if vu_upper is not None:
+        cfg.vu_upper = vu_upper
+
+    blade, result = _safe_compute_blade(cfg)
+
+    try:
+        plot_contour(
+            blade.lower_x,
+            blade.lower_y,
+            blade.upper_x,
+            blade.upper_y,
+            title=f"Raw Blade Geometry — {cfg.name}",
+            save_path=f"result/{cfg.name}_raw.png" if cfg.save_fig else None,
+        )
+    except Exception as e:
+        typer.echo(f"Error plotting raw geometry: {e}")
+        raise typer.Exit(code=1)
+
+
+@app.command("plot-char")
+def plot_char(
+    settings: str,
+    asymmetric: bool = typer.Option(None),
+    vl_lower: float = typer.Option(None),
+    vl_upper: float = typer.Option(None),
+    vu_lower: float = typer.Option(None),
+    vu_upper: float = typer.Option(None),
+):
+    """
+    Plot characteristic lines (compression & expansion).
+    """
+    cfg = _safe_load_config(settings)
+
+    if asymmetric is not None:
+        cfg.asymmetric = asymmetric
+    if vl_lower is not None:
+        cfg.vl_lower = vl_lower
+    if vl_upper is not None:
+        cfg.vl_upper = vl_upper
+    if vu_lower is not None:
+        cfg.vu_lower = vu_lower
+    if vu_upper is not None:
+        cfg.vu_upper = vu_upper
+
+    blade, result = _safe_compute_blade(cfg)
+
+    try:
+        plot_characteristics(
+            blade.x0,
+            blade.y0,
+            blade.x1,
+            blade.y1,
+            title=f"Characteristics — {cfg.name}",
+            save_path=f"result/{cfg.name}_char.png" if cfg.save_fig else None,
+        )
+    except Exception as e:
+        typer.echo(f"Error plotting characteristics: {e}")
+        raise typer.Exit(code=1)
+
+
+@app.command("plot-nu")
+def plot_nu(
+    settings: str,
+):
+    """
+    Plot Prandtl–Meyer function ν(M) with inlet/outlet markers.
+    """
+    cfg = _safe_load_config(settings)
+
+    mach_points = {
+        "Inlet": cfg.mach_in,
+        "Outlet": cfg.mach_out,
+    }
+
+    try:
+        plot_prandtl_meyer(
+            gamma=cfg.gamma,
+            mach_points=mach_points,
+            save_path=f"result/{cfg.name}_nu.png" if cfg.save_fig else None,
+        )
+    except Exception as e:
+        typer.echo(f"Error plotting Prandtl–Meyer: {e}")
         raise typer.Exit(code=1)
 
 
