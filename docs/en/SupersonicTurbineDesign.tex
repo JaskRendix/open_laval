@@ -1,0 +1,141 @@
+\chapter{Design Methodology}
+\begin{abstract}
+
+This document summarizes the design procedure for supersonic impulse turbine blades,
+based on classical shock–expansion theory and the method of characteristics.
+The accompanying program, OpenLaval, implements this procedure and supports
+both symmetric and asymmetric blade geometries by allowing independent
+Prandtl–Meyer angles for the upper and lower surfaces.
+
+In an asymmetric blade, the upper and lower surfaces undergo different amounts
+of expansion, resulting in different R$^\ast$ values, different characteristic
+curves, and different arc segments. This chapter describes the complete design
+workflow, including the asymmetric formulation now supported by the software.
+
+\end{abstract}
+
+\section{Overview}
+
+The design of a supersonic impulse turbine blade begins with constructing
+wall shapes that cancel the shocks generated at the leading edge.
+Only a small number of physical parameters are required:
+
+\begin{itemize}
+  \item inlet Mach number $M_{\mathrm{in}}$
+  \item outlet Mach number $M_{\mathrm{out}}$
+  \item specific heat ratio $\gamma$
+  \item inlet flow angle $\beta_{\mathrm{in}}$
+  \item Prandtl–Meyer angles for the upper and lower surfaces
+\end{itemize}
+
+OpenLaval supports both symmetric blades
+(using a single pair $(\nu_l, \nu_u)$)
+and asymmetric blades
+(using four independent angles):
+
+
+\[
+\nu_{l,\mathrm{lower}},\quad
+\nu_{u,\mathrm{lower}},\quad
+\nu_{l,\mathrm{upper}},\quad
+\nu_{u,\mathrm{upper}}.
+\]
+
+
+
+These angles must satisfy the physical constraint
+
+
+\[
+\nu_{\min} \le \nu_l < \nu_u \le \nu_{\max},
+\]
+
+
+where $\nu_{\min}$ and $\nu_{\max}$ are the Prandtl–Meyer angles
+corresponding to $M_{\mathrm{in}}$ and $M_{\mathrm{out}}$.
+
+\section{Design Procedure}
+
+The complete design workflow is as follows:
+
+\begin{enumerate}
+  \item Generate shock-cancelling characteristic curves for the upper and lower surfaces.
+  \item Construct arc segments for each surface (R$^\ast$ differs between surfaces in the asymmetric case).
+  \item Construct the upper-surface straight-line region based on the inlet flow angle and trim it to match the lower surface.
+  \item Determine the blade height from the vertical separation of the two surfaces and assemble the full coordinates.
+  \item Apply leading-edge trimming using the parameters \texttt{edge\_delta} and \texttt{edge\_offset}.
+\end{enumerate}
+
+In an asymmetric blade, steps 1–3 are performed independently for the upper and lower surfaces.
+
+\section{Asymmetric Prandtl–Meyer Angles}
+
+In the asymmetric formulation, the designer specifies four angles:
+
+
+\[
+(\nu_{l,\mathrm{lower}}, \nu_{u,\mathrm{lower}}), \qquad
+(\nu_{l,\mathrm{upper}}, \nu_{u,\mathrm{upper}}).
+\]
+
+
+
+These define the amount of expansion on each surface.
+Because the characteristic curves depend directly on these angles,
+the resulting geometry differs between the upper and lower sides.
+
+OpenLaval validates all four angles to ensure they lie within the physically
+admissible Prandtl–Meyer range.
+
+\section{Shock-Cancelling Curves}
+
+The shock-cancelling curves are generated from the characteristic relation
+
+
+\[
+\phi(R^\ast, \theta) = \mathrm{const.}
+\]
+
+
+
+In the asymmetric case, the initial conditions differ between the upper and
+lower surfaces, producing two distinct characteristic curves and two distinct
+R$^\ast$ values.
+
+\section{Arc Segments}
+
+To ensure continuity between the characteristic curves and the straight-line
+region, each surface receives its own circular arc segment.
+Because R$^\ast$ differs between surfaces in the asymmetric case,
+the arc radii also differ.
+
+\section{Straight-Line Region}
+
+The upper-surface straight-line region is aligned with the inlet flow angle
+$\beta_{\mathrm{in}}$.
+It is then trimmed to match the lower-surface $x$-coordinate.
+In the asymmetric case, the connection points differ between surfaces.
+
+\section{Leading-Edge Trimming}
+
+OpenLaval applies leading-edge trimming using the parameters
+\texttt{edge\_delta} and \texttt{edge\_offset}.
+This operation is performed after both surfaces have been constructed.
+Because the surfaces differ in the asymmetric case, the trimming points also differ.
+
+\section{Program Usage}
+
+The configuration file supports the following parameters:
+
+\begin{itemize}
+  \item symmetric PM angles: \texttt{vl}, \texttt{vu}
+  \item asymmetric PM angles:
+        \texttt{vl\_lower}, \texttt{vl\_upper},
+        \texttt{vu\_lower}, \texttt{vu\_upper}
+  \item inlet flow angle: \texttt{beta\_in}
+  \item leading-edge parameters: \texttt{edge\_delta}, \texttt{edge\_offset}
+  \item interpolation resolution: \texttt{num\_points}
+\end{itemize}
+
+The CLI provides an \texttt{--asymmetric} flag and override options for all
+asymmetric angles.

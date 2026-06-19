@@ -1,0 +1,164 @@
+\chapter{Tlamantli Tlamaniliztli}
+\begin{abstract}
+
+Inin amatl tlatlaçotla in tlamaniliztli para in tlapetlanilotl
+tēpoztli ātlacualoyan, tlen mochihua ica in tlatlaminaliztli
+ihuan in tlatlapaliztli tlen āyōtl.
+Inin tlamaniliztli OpenLaval quipalehuia in tlamaniliztli
+ica ome īxiptla: tlen se tlamantli (symmetric) ihuan tlen
+ome‑ixiptla (asymmetric), in tlen quipiya in Prandtl–Meyer
+tlapalehuiliztli para īpan ihuan īcxitlan in ātlacualoyan.
+
+Ipan in ome‑ixiptla tlamantli, in īpan ihuan īcxitlan
+mopalehuiya ica ahmo se tlamantli tlatlapaliztli,
+huan yeh inin quichihua in R$^\ast$ ahmo se,
+in tlatlapaliztli ahmo se, ihuan in tlatzintla‑tlacuilolli
+ahmo se. Inin amatl quipohua in tlamantli tlen
+OpenLaval quichihua axcan.
+
+\end{abstract}
+
+\section{Tlayecantli}
+
+In tlamaniliztli tlen tlapetlanilotl tēpoztli
+mopehua ica in tlacuilolli tlen quixpolōa in tlatlaminaliztli
+tlen mochihua īpan in tlayacantli.
+Mochi tlen monequi:
+
+\begin{itemize}
+  \item inlet Mach number $M_{\mathrm{in}}$
+  \item outlet Mach number $M_{\mathrm{out}}$
+  \item specific heat ratio $\gamma$
+  \item inlet flow angle $\beta_{\mathrm{in}}$
+  \item Prandtl–Meyer angles para īpan ihuan īcxitlan
+\end{itemize}
+
+OpenLaval quipalehuia se‑ixiptla tlamantli
+(ica se par $(\nu_l, \nu_u)$)
+ihuan ome‑ixiptla tlamantli
+(ica nāhui tlapalehuiliztli):
+
+
+
+\[
+\nu_{l,\mathrm{lower}},\quad
+\nu_{u,\mathrm{lower}},\quad
+\nu_{l,\mathrm{upper}},\quad
+\nu_{u,\mathrm{upper}}.
+\]
+
+
+
+Inin tlapalehuiliztli monequi quipiya in tlanahuatilli:
+
+
+
+\[
+\nu_{\min} \le \nu_l < \nu_u \le \nu_{\max},
+\]
+
+
+
+tlen quipiya in Prandtl–Meyer tlapalehuiliztli
+tlen $M_{\mathrm{in}}$ ihuan $M_{\mathrm{out}}$.
+
+\section{Tlamaniliztli Tlatlamantli}
+
+In tlamaniliztli mochihua inin:
+
+\begin{enumerate}
+  \item Tlatlapaliztli tlen quixpolōa in tlatlaminaliztli
+        para īpan ihuan īcxitlan.
+  \item Tlachihualiztli in tlatzintla‑tlacuilolli (arc segments)
+        para cada īxiptla (R$^\ast$ ahmo se).
+  \item Tlachihualiztli in īpan tlacuilolli ica in
+        $\beta_{\mathrm{in}}$ ihuan quitzontequi para īcxitlan.
+  \item Tlatzontequiliztli in huehcatl (blade height)
+        ihuan tlatzontequiliztli in mochi coordenadas.
+  \item Tlayacantli‑tlatequi (leading‑edge trimming)
+        ica \texttt{edge\_delta} ihuan \texttt{edge\_offset}.
+\end{enumerate}
+
+Ipan in ome‑ixiptla tlamantli, in 1–3 mochihua
+para cada īxiptla.
+
+\section{Ome‑Ixiptla Prandtl–Meyer Tlapalehuiliztli}
+
+Ipan in ome‑ixiptla tlamantli, in tlacuilo quipiya
+nāhui tlapalehuiliztli:
+
+
+
+\[
+(\nu_{l,\mathrm{lower}}, \nu_{u,\mathrm{lower}}), \qquad
+(\nu_{l,\mathrm{upper}}, \nu_{u,\mathrm{upper}}).
+\]
+
+
+
+Inin quipiya in tlatlapaliztli tlen mochihua īpan
+ihuan īcxitlan.
+Yeh inin quichihua in tlatlapaliztli ahmo se.
+
+OpenLaval quichihua tlatlanahuatilli para mochi
+tlapalehuiliztli.
+
+\section{Tlatlaminaliztli‑Quixpolōlli (Shock‑Cancelling Curves)}
+
+In tlatlapaliztli mochihua ica in tlanahuatilli:
+
+
+
+\[
+\phi(R^\ast, \theta) = \mathrm{const.}
+\]
+
+
+
+Ipan in ome‑ixiptla tlamantli, in tlayecantli
+ahmo se, ihuan in R$^\ast$ ahmo se.
+
+\section{Tlatzintla‑Tlacuilolli (Arc Segments)}
+
+Para quichihua se tlatzontequiliztli,
+cada īxiptla quipiya se arc segment.
+Ipan in ome‑ixiptla tlamantli,
+
+
+\[
+R^\ast_{\mathrm{upper}} \ne R^\ast_{\mathrm{lower}},
+\]
+
+
+huan in radius ahmo se.
+
+\section{Tlayecantli‑Tlacuilolli (Straight‑Line Region)}
+
+In īpan tlacuilolli mopalehuiya ica in
+$\beta_{\mathrm{in}}$ ihuan quitzontequi para īcxitlan.
+Ipan in ome‑ixiptla tlamantli, in tlatzontequiliztli
+ahmo se.
+
+\section{Tlayacantli‑Tlatequi (Leading‑Edge Trimming)}
+
+OpenLaval quichihua in tlayacantli‑tlatequi
+ica \texttt{edge\_delta} ihuan \texttt{edge\_offset}.
+Ipan in ome‑ixiptla tlamantli, in tlatequi‑tlacuilolli
+ahmo se.
+
+\section{Program Usage}
+
+In config amatl quipiya:
+
+\begin{itemize}
+  \item symmetric PM: \texttt{vl}, \texttt{vu}
+  \item asymmetric PM:
+        \texttt{vl\_lower}, \texttt{vl\_upper},
+        \texttt{vu\_lower}, \texttt{vu\_upper}
+  \item inlet angle: \texttt{beta\_in}
+  \item leading‑edge: \texttt{edge\_delta}, \texttt{edge\_offset}
+  \item interpolation: \texttt{num\_points}
+\end{itemize}
+
+In CLI quipiya \texttt{--asymmetric} para mochi
+tlapalehuiliztli.
