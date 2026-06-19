@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openlaval"
+version = "1.0.0"
+description = "Supersonic impulse turbine blade generator based on method of characteristics"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Interstellar Technologies Inc." },
+    { name = "Giorgio" }
+]
+requires-python = ">=3.12"
+
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "pandas",
+    "typer",
+    "pydantic",
+    "openpyxl",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[project.scripts]
+openlaval = "openlaval.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["openlaval*"]

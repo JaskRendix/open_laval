@@ -1,0 +1,10 @@
+numpy
+scipy
+matplotlib
+pandas
+typer
+pydantic
+openpyxl
+
+[test]
+pytest

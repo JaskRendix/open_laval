@@ -1,0 +1,36 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Mypy
+.mypy_cache/
+
+# Pytest
+.pytest_cache/
+
+# LaTeX build artifacts
+SupersonicTurbineDesign.aux
+SupersonicTurbineDesign.log
+SupersonicTurbineDesign.synctex.gz
+SupersonicTurbineDesign.toc
+SupersonicTurbineDesign.idx
+
+# Output files
+result/*.png
+result/*.xlsx
+result/*.csv
+result/*.json
+
+# Editor swap/backup files
+*.un~
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,23 @@
+[config]
+name       = "example"
+save_fig   = true
+save_excel = true
+num_points = 200
+
+[turbine_blade]
+gamma    = 1.4
+
+# Real expansion
+mach_in  = 2.5
+mach_out = 3.0
+
+beta_in  = 70
+
+# Must satisfy: ν_in ≤ vl < vu ≤ ν_out
+# ν_in ≈ 39.12°, ν_out ≈ 49.76°
+vl = 40.0
+vu = 48.0
+
+[edge]
+delta  = 8
+offset = 0.1
