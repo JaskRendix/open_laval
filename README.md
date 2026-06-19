@@ -17,6 +17,7 @@ This repository is a refactored and modular version of the original project publ
 - Export of geometry and metadata  
 - Plotting of contours and Prandtl–Meyer diagrams  
 - Configuration through a simple `settings.ini` file  
+- asymmetric blade support  
 
 ---
 
@@ -96,10 +97,9 @@ OpenLaval implements the design methods described in the following reports:
 
 ## Status and future work
 
-The refactored version provides a modular structure suitable for extension.  
-Possible future additions:
+The refactored version provides a modular structure suitable for extension.
 
-- asymmetric blade support  
-- improved evaluation functions  
-- additional export formats  
-- validation against published cascade data  
+Possible future additions:
+- improved evaluation functions
+- additional export formats
+- validation against published cascade data
