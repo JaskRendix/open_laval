@@ -16,7 +16,7 @@ This repository is a refactored and modular version of the original project publ
 - Interpolated blade contour suitable for CAD or CFD preprocessing  
 - Export of geometry and metadata  
 - Plotting of contours and Prandtl–Meyer diagrams  
-- Configuration through a simple `settings.ini` file  
+- Configuration through a simple `setting.toml` file  
 - asymmetric blade support  
 
 ---
@@ -40,7 +40,7 @@ This installs the `openlaval` CLI.
 Prepare a configuration file:
 
 ```
-settings.ini
+setting.toml
 ```
 
 Then run one of the CLI commands.
@@ -48,19 +48,19 @@ Then run one of the CLI commands.
 ### Compute geometry
 
 ```
-openlaval run settings.ini
+openlaval run setting.toml
 ```
 
 ### Plot the blade contour
 
 ```
-openlaval plot settings.ini
+openlaval plot setting.toml
 ```
 
 ### Export geometry and metadata
 
 ```
-openlaval export settings.ini --outdir result/
+openlaval export setting.toml --outdir result/
 ```
 
 All output files are written to the chosen directory.
@@ -79,7 +79,7 @@ The configuration file defines:
 - number of interpolation points  
 - output options  
 
-See `settings.ini` for an example.
+See `setting.toml` for an example.
 
 ---
 

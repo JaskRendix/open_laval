@@ -13,7 +13,7 @@ mach_out = 3.0
 
 beta_in  = 70
 
-Wvl = 40.0
+vl = 40.0
 vu = 48.0
 
 # --- Asymmetric mode (optional) ---
