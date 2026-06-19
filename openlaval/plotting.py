@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+def _is_headless() -> bool:
+    return matplotlib.get_backend().lower() == "agg"
 
 
 def plot_contour(
@@ -31,7 +36,8 @@ def plot_contour(
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
-    plt.show()
+    if not _is_headless():
+        plt.show()
 
 
 def plot_interpolated_contour(
@@ -58,7 +64,8 @@ def plot_interpolated_contour(
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
-    plt.show()
+    if not _is_headless():
+        plt.show()
 
 
 def plot_characteristics(
@@ -81,7 +88,8 @@ def plot_characteristics(
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
-    plt.show()
+    if not _is_headless():
+        plt.show()
 
 
 def plot_prandtl_meyer(
@@ -122,4 +130,5 @@ def plot_prandtl_meyer(
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
-    plt.show()
+    if not _is_headless():
+        plt.show()

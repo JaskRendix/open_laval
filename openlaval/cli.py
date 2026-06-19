@@ -113,6 +113,7 @@ def plot(
             result["lower"],
             result["upper"],
             title=f"Blade Contour — {cfg.name}",
+            save_path=f"result/{cfg.name}_contour.png" if cfg.save_fig else None,
         )
     except Exception as e:
         typer.echo(f"Error plotting blade: {e}")
