@@ -264,3 +264,122 @@ offset = 0.1
 
     assert result.exit_code != 0
     assert "Invalid Prandtl–Meyer" in result.stdout
+
+
+def test_cli_plot_thickness(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with (
+        patch("openlaval.cli.Blade") as MockBlade,
+        patch("openlaval.cli.plot_thickness") as mock_plot,
+    ):
+        mock_blade = MagicMock()
+        mock_blade.compute.return_value = {
+            "x": [0, 1],
+            "lower": [0, -1],
+            "upper": [1, 2],
+            "solidity": 0.8,
+        }
+        MockBlade.return_value = mock_blade
+
+        result = runner.invoke(app, ["plot-thickness", str(cfg_path)])
+
+    assert result.exit_code == 0
+    mock_plot.assert_called_once()
+
+
+def test_cli_plot_camber(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with (
+        patch("openlaval.cli.Blade") as MockBlade,
+        patch("openlaval.cli.plot_camber") as mock_plot,
+    ):
+        mock_blade = MagicMock()
+        mock_blade.compute.return_value = {
+            "x": [0, 1],
+            "lower": [0, -1],
+            "upper": [1, 2],
+            "solidity": 0.8,
+        }
+        MockBlade.return_value = mock_blade
+
+        result = runner.invoke(app, ["plot-camber", str(cfg_path)])
+
+    assert result.exit_code == 0
+    mock_plot.assert_called_once()
+
+
+def test_cli_plot_curvature(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with (
+        patch("openlaval.cli.Blade") as MockBlade,
+        patch("openlaval.cli.plot_curvature") as mock_plot,
+    ):
+        mock_blade = MagicMock()
+        mock_blade.lower_x = [0, 1]
+        mock_blade.lower_y = [0, -1]
+        mock_blade.upper_x = [0, 1]
+        mock_blade.upper_y = [1, 2]
+        mock_blade.compute.return_value = {
+            "x": [0, 1],
+            "lower": [0, -1],
+            "upper": [1, 2],
+            "solidity": 0.8,
+        }
+        MockBlade.return_value = mock_blade
+
+        result = runner.invoke(app, ["plot-curvature", str(cfg_path)])
+
+    assert result.exit_code == 0
+    # curvature is called twice (lower + upper)
+    assert mock_plot.call_count == 2
+
+
+def test_cli_plot_raw_vs_interp(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with (
+        patch("openlaval.cli.Blade") as MockBlade,
+        patch("openlaval.cli.plot_raw_vs_interp") as mock_plot,
+    ):
+        mock_blade = MagicMock()
+        mock_blade.lower_x = [0, 1]
+        mock_blade.lower_y = [0, -1]
+        mock_blade.upper_x = [0, 1]
+        mock_blade.upper_y = [1, 2]
+        mock_blade.compute.return_value = {
+            "x": [0, 1],
+            "lower": [0, -1],
+            "upper": [1, 2],
+            "solidity": 0.8,
+        }
+        MockBlade.return_value = mock_blade
+
+        result = runner.invoke(app, ["plot-raw-vs-interp", str(cfg_path)])
+
+    assert result.exit_code == 0
+    mock_plot.assert_called_once()
+
+
+def test_cli_plot_asymmetry(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with (
+        patch("openlaval.cli.Blade") as MockBlade,
+        patch("openlaval.cli.plot_asymmetry") as mock_plot,
+    ):
+        mock_blade = MagicMock()
+        mock_blade.compute.return_value = {
+            "x": [0, 1],
+            "lower": [0, -1],
+            "upper": [1, 2],
+            "solidity": 0.8,
+        }
+        MockBlade.return_value = mock_blade
+
+        result = runner.invoke(app, ["plot-asymmetry", str(cfg_path)])
+
+    assert result.exit_code == 0
+    mock_plot.assert_called_once()

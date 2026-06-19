@@ -1,15 +1,21 @@
 from pathlib import Path
 
+import numpy as np
 import typer
 
 from .blade import Blade, BladeConfig
 from .config import load_config
 from .io import save_all_results
 from .plotting import (
+    plot_asymmetry,
+    plot_camber,
     plot_characteristics,
     plot_contour,
+    plot_curvature,
     plot_interpolated_contour,
     plot_prandtl_meyer,
+    plot_raw_vs_interp,
+    plot_thickness,
 )
 
 app = typer.Typer(help="OpenLaval — Supersonic Impulse Turbine Blade Generator")
@@ -117,12 +123,15 @@ def plot(
 
     blade, result = _safe_compute_blade(cfg)
 
+    lower = np.array(result["lower"])
+    upper = np.array(result["upper"])
+
     print("Lower surface (interp):")
-    print(result["lower"][:10])
+    print(lower[:10])
     print("Upper surface (interp):")
-    print(result["upper"][:10])
+    print(upper[:10])
     print("Difference (upper - lower):")
-    print((result["upper"] - result["lower"])[:10])
+    print((upper - lower)[:10])
 
     try:
         plot_interpolated_contour(
@@ -242,6 +251,86 @@ def plot_nu(
     except Exception as e:
         typer.echo(f"Error plotting Prandtl–Meyer: {e}")
         raise typer.Exit(code=1)
+
+
+@app.command("plot-thickness")
+def plot_thickness_cmd(settings: str):
+    cfg = _safe_load_config(settings)
+    blade, result = _safe_compute_blade(cfg)
+
+    plot_thickness(
+        result["x"],
+        result["lower"],
+        result["upper"],
+        title=f"Thickness — {cfg.name}",
+        save_path=f"result/{cfg.name}_thickness.png" if cfg.save_fig else None,
+    )
+
+
+@app.command("plot-camber")
+def plot_camber_cmd(settings: str):
+    cfg = _safe_load_config(settings)
+    blade, result = _safe_compute_blade(cfg)
+
+    plot_camber(
+        result["x"],
+        result["lower"],
+        result["upper"],
+        title=f"Camber — {cfg.name}",
+        save_path=f"result/{cfg.name}_camber.png" if cfg.save_fig else None,
+    )
+
+
+@app.command("plot-curvature")
+def plot_curvature_cmd(settings: str):
+    cfg = _safe_load_config(settings)
+    blade, result = _safe_compute_blade(cfg)
+
+    plot_curvature(
+        blade.lower_x,
+        blade.lower_y,
+        title=f"Curvature Lower — {cfg.name}",
+        save_path=f"result/{cfg.name}_curv_lower.png" if cfg.save_fig else None,
+    )
+
+    plot_curvature(
+        blade.upper_x,
+        blade.upper_y,
+        title=f"Curvature Upper — {cfg.name}",
+        save_path=f"result/{cfg.name}_curv_upper.png" if cfg.save_fig else None,
+    )
+
+
+@app.command("plot-raw-vs-interp")
+def plot_raw_vs_interp_cmd(settings: str):
+    cfg = _safe_load_config(settings)
+    blade, result = _safe_compute_blade(cfg)
+
+    plot_raw_vs_interp(
+        blade.lower_x,
+        blade.lower_y,
+        blade.upper_x,
+        blade.upper_y,
+        result["x"],
+        result["lower"],
+        result["upper"],
+        title=f"Raw vs Interpolated — {cfg.name}",
+        save_path=f"result/{cfg.name}_raw_vs_interp.png" if cfg.save_fig else None,
+    )
+
+
+@app.command("plot-asymmetry")
+def plot_asymmetry_cmd(settings: str):
+    cfg = _safe_load_config(settings)
+    blade, result = _safe_compute_blade(cfg)
+
+    plot_asymmetry(
+        result["x"],
+        result["lower"],
+        result["upper"],
+        title=f"Asymmetry — {cfg.name}",
+        save_path=f"result/{cfg.name}_asymmetry.png" if cfg.save_fig else None,
+    )
 
 
 @app.command()
