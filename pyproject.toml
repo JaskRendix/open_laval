@@ -27,6 +27,7 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "pytest",
+    "pytest-cov",
 ]
 
 [project.scripts]
@@ -35,3 +36,6 @@ openlaval = "openlaval.cli:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["openlaval*"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=openlaval --cov-report=term-missing"

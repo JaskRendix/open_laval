@@ -11,6 +11,7 @@ venv/
 .mypy_cache/
 
 # Pytest
+.coverage
 .pytest_cache/
 
 # LaTeX build artifacts
