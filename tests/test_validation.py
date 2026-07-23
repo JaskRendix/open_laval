@@ -5,6 +5,7 @@ import pytest
 
 from openlaval.blade import Blade, BladeConfig
 from openlaval.evaluation import evaluate_blade_performance
+from openlaval.physics import prandtl_meyer
 
 
 @pytest.fixture
@@ -13,14 +14,18 @@ def naca_l52b06_baseline_config() -> BladeConfig:
     Configuration based on typical supersonic impulse cascade parameters 
     referenced in NACA RM L52B06 (e.g., design inlet Mach ~1.57, turning ~120°).
     """
+    gamma = 1.4
+    mach_in = 1.57
+    nu_in = np.degrees(prandtl_meyer(mach_in, gamma))
+    
     return BladeConfig(
         name="naca_l52b06_baseline",
-        gamma=1.4,
-        mach_in=1.57,
-        mach_out=1.57,  # Isentropic impulse reference
+        gamma=gamma,
+        mach_in=mach_in,
+        mach_out=mach_in,  # Isentropic impulse reference
         beta_in=60.0,
-        vu=25.0,
-        vl=25.0,
+        vu=nu_in + 10.0,
+        vl=nu_in + 5.0,
         edge_delta=5.0,
         edge_offset=0.1,
         num_points=100,
@@ -67,14 +72,17 @@ def test_validation_parametric_trends(mach_in, beta_in, expected_min_turning):
     Regression validation across varying historical design entry conditions 
     to ensure monotonic and physically sound behavior.
     """
+    gamma = 1.4
+    nu_in = np.degrees(prandtl_meyer(mach_in, gamma))
+
     cfg = BladeConfig(
         name="sweep_regression",
-        gamma=1.4,
+        gamma=gamma,
         mach_in=mach_in,
         mach_out=mach_in,
         beta_in=beta_in,
-        vu=20.0,
-        vl=20.0,
+        vu=nu_in + 12.0,
+        vl=nu_in + 6.0,
         edge_delta=5.0,
         edge_offset=0.1,
         num_points=50,
