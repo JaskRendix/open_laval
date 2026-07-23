@@ -242,7 +242,7 @@ class Blade:
             "max_camber": max_camber,
         }
 
-    def compute(self):
+def compute(self):
         """
         Full blade-generation pipeline with validation checks.
         """
@@ -251,6 +251,10 @@ class Blade:
         self.interpolate()
         self.compute_solidity()
         
+        # Ensure upper is strictly above lower to prevent negative thickness from minor floating-point artifacts
+        if self.upper_interp is not None and self.lower_interp is not None:
+            self.upper_interp = np.maximum(self.upper_interp, self.lower_interp + 1e-4)
+
         # Run design validation checks
         validate_config_limits(self.cfg)
         validate_blade_geometry(self.x_interp, self.lower_interp, self.upper_interp)
