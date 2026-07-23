@@ -13,6 +13,7 @@ from .geometry import (
     upper_convex_transition,
 )
 from .physics import mach_after_edge, prandtl_meyer
+from .validation import validate_blade_geometry, validate_config_limits
 
 
 class Blade:
@@ -243,13 +244,17 @@ class Blade:
 
     def compute(self):
         """
-        Full blade-generation pipeline.
+        Full blade-generation pipeline with validation checks.
         """
         self.compute_flow_relations()
         self.generate_geometry()
         self.interpolate()
         self.compute_solidity()
         
+        # Run design validation checks
+        validate_config_limits(self.cfg)
+        validate_blade_geometry(self.x_interp, self.lower_interp, self.upper_interp)
+
         metrics = self.compute_metrics()
 
         return {
