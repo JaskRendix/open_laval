@@ -505,8 +505,8 @@ def test_cli_validate(tmp_path):
 
         mock_blade = MagicMock()
         mock_result = {
-            "lower": [0, 0],
-            "upper": [1, 1],
+            "lower": np.array([0.0, 0.0]),
+            "upper": np.array([1.0, 1.0]),
             "max_thickness": 2.0,
         }
         mock_compute.return_value = (mock_blade, mock_result)
