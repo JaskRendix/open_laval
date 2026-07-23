@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import glob
 from pathlib import Path
 
@@ -135,6 +136,59 @@ def batch(
     typer.echo("\n--- Batch Summary ---")
     for item in summary_data:
         typer.echo(f"{item['file']} -> Chord: {item['chord']:.3f}, Thick: {item['max_thickness']:.3f}, Solidity: {item['solidity']:.3f}")
+
+
+@app.command("sweep")
+def sweep_cmd(
+    settings: str,
+    param: str = typer.Option(..., help="Configuration parameter to sweep (e.g., 'mach_in', 'mach_out', 'beta_in')"),
+    start: float = typer.Option(..., help="Start value for the sweep parameter."),
+    end: float = typer.Option(..., help="End value for the sweep parameter."),
+    steps: int = typer.Option(5, help="Number of evaluation steps."),
+    output_dir: str = typer.Option("output_sweep", help="Directory to save sweep results and summary CSV."),
+):
+    """
+    Run an automated parameter sweep and summarize trends.
+    """
+    cfg = _safe_load_config(settings)
+    
+    if not hasattr(cfg, param):
+        typer.echo(f"Error: Parameter '{param}' not found in BladeConfig.", err=True)
+        raise typer.Exit(code=1)
+
+    out_path = Path(output_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+
+    values = np.linspace(start, end, steps)
+    sweep_results = []
+
+    typer.echo(f"Starting sweep for '{param}' from {start} to {end} ({steps} steps)...")
+
+    for val in values:
+        setattr(cfg, param, val)
+        try:
+            blade, result = _safe_compute_blade(cfg)
+            row = {
+                param: val,
+                "chord": result.get("chord"),
+                "max_thickness": result.get("max_thickness"),
+                "solidity": result.get("solidity"),
+            }
+            sweep_results.append(row)
+            typer.echo(f"  [SUCCESS] {param} = {val:.4f} -> Chord: {row['chord']:.3f}, Solidity: {row['solidity']:.3f}")
+        except Exception as e:
+            typer.echo(f"  [ERROR] {param} = {val:.4f}: {e}", err=True)
+
+    if sweep_results:
+        csv_file = out_path / f"sweep_{param}_summary.csv"
+        with open(csv_file, mode="w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=sweep_results[0].keys())
+            writer.writeheader()
+            writer.writerows(sweep_results)
+        typer.echo(f"\nSweep completed successfully. Results saved to {csv_file}")
+    else:
+        typer.echo("\nSweep failed: no valid configurations computed.", err=True)
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -414,6 +468,22 @@ def export_cad_cmd(settings: str, outdir: str = "result"):
         typer.echo(f"Successfully exported CAD/CFD formats:\n  - {dat_path}\n  - {csv_path}")
     except Exception as e:
         typer.echo(f"Error exporting CAD files: {e}", err=True)
+        raise typer.Exit(code=1)
+
+
+@app.command("validate")
+def validate_cmd(settings: str):
+    """
+    Validate a blade configuration and its geometry for physical/geometric flaws.
+    """
+    cfg = _safe_load_config(settings)
+    try:
+        blade, result = _safe_compute_blade(cfg)
+        typer.echo(f"Validation PASSED for blade: {cfg.name}")
+        typer.echo(f"  - Min Thickness: {np.min(result['upper'] - result['lower']):.4f}")
+        typer.echo(f"  - Max Thickness: {result['max_thickness']:.4f}")
+    except Exception as e:
+        typer.echo(f"Validation FAILED: {e}", err=True)
         raise typer.Exit(code=1)
 
 
