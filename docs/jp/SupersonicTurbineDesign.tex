@@ -44,6 +44,16 @@ OpenLaval では，上面と下面で異なる
 非対称翼の設計が可能である。
 これにより，上面と下面で異なる膨張量を持つ翼形状を構築できる。
 
+これらは必ず有効なプラントル・マイヤー角の範囲内
+
+
+\[
+\nu_{\min} \le \nu_l < \nu_u \le \nu_{\max}
+\]
+
+
+を満たす必要がある。ここで，$\nu_{\min} = \min(\nu(M_{\mathrm{in}}), \nu(M_{\mathrm{out}}))$ および $\nu_{\max} = \max(\nu(M_{\mathrm{in}}), \nu(M_{\mathrm{out}}))$ である。
+
 \section{設計手順}
 
 設計手順の全体像は以下の通りである：
@@ -67,15 +77,13 @@ OpenLaval では，上面と下面で異なる
 
 
 \[
-\nu_{l,\mathrm{lower}},\quad
-\nu_{u,\mathrm{lower}},\quad
-\nu_{l,\mathrm{upper}},\quad
-\nu_{u,\mathrm{upper}}
+(\nu_{l,\mathrm{lower}}, \nu_{u,\mathrm{lower}}), \qquad
+(\nu_{l,\mathrm{upper}}, \nu_{u,\mathrm{upper}})
 \]
 
 
 
-これらは必ず
+これらはそれぞれの面において個別に
 
 
 \[
@@ -142,4 +150,4 @@ OpenLaval の設定ファイルでは以下を指定できる：
 \end{itemize}
 
 CLI では \texttt{--asymmetric} フラグを用いて
-非対称パラメータを上書きできる。
+非対称パラメータを有効化・上書きできる。
