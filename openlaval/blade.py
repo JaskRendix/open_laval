@@ -218,6 +218,29 @@ class Blade:
 
         self.solidity = Cstar / Gstar
 
+    def compute_metrics(self) -> dict:
+        """
+        Compute key geometric quality metrics for the blade.
+        """
+        if self.x_interp is None or self.lower_interp is None or self.upper_interp is None:
+            return {}
+
+        thickness = self.upper_interp - self.lower_interp
+        max_thickness = float(np.max(thickness))
+        max_thickness_loc = float(self.x_interp[np.argmax(thickness)])
+        
+        camber = 0.5 * (self.upper_interp + self.lower_interp)
+        max_camber = float(np.max(np.abs(camber)))
+        
+        chord = float(self.x_interp[-1] - self.x_interp[0])
+
+        return {
+            "chord": chord,
+            "max_thickness": max_thickness,
+            "max_thickness_location": max_thickness_loc,
+            "max_camber": max_camber,
+        }
+
     def compute(self):
         """
         Full blade-generation pipeline.
@@ -226,10 +249,13 @@ class Blade:
         self.generate_geometry()
         self.interpolate()
         self.compute_solidity()
+        
+        metrics = self.compute_metrics()
 
         return {
             "x": self.x_interp,
             "lower": self.lower_interp,
             "upper": self.upper_interp,
             "solidity": self.solidity,
+            **metrics,  # Unpacks chord, max_thickness, etc. directly into results
         }
