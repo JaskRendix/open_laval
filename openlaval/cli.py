@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import glob
 from pathlib import Path
 
@@ -6,7 +8,7 @@ import typer
 
 from .blade import Blade, BladeConfig
 from .config import load_config
-from .io import save_all_results
+from .io import save_all_results, save_cfd_dat, save_csv_coordinates
 from .plotting import (
     plot_asymmetry,
     plot_camber,
@@ -396,6 +398,23 @@ def plot_asymmetry_cmd(settings: str):
         title=f"Asymmetry — {cfg.name}",
         save_path=f"result/{cfg.name}_asymmetry.png" if cfg.save_fig else None,
     )
+
+
+@app.command("export-cad")
+def export_cad_cmd(settings: str, outdir: str = "result"):
+    """
+    Export specific CFD/CAD coordinate files (.dat and .csv).
+    """
+    cfg = _safe_load_config(settings)
+    blade, result = _safe_compute_blade(cfg)
+
+    try:
+        dat_path = save_cfd_dat(outdir, cfg.name, result["x"], result["lower"], result["upper"])
+        csv_path = save_csv_coordinates(outdir, cfg.name, result["x"], result["lower"], result["upper"])
+        typer.echo(f"Successfully exported CAD/CFD formats:\n  - {dat_path}\n  - {csv_path}")
+    except Exception as e:
+        typer.echo(f"Error exporting CAD files: {e}", err=True)
+        raise typer.Exit(code=1)
 
 
 @app.command()
