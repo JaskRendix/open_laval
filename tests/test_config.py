@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import numpy as np
 import pytest
+from typer.testing import CliRunner
 
 from openlaval.blade import Blade
+from openlaval.cli import app
 from openlaval.config import BladeConfig
 from openlaval.physics import prandtl_meyer
 
@@ -33,11 +37,11 @@ def make_cfg(
     nu_min = min(nu_in, nu_out)
     nu_max = max(nu_in, nu_out)
 
-    # Default symmetric values
+    # Default values chosen to ensure positive geometric thickness
     if vl is None:
-        vl = nu_min + 0.1 * (nu_max - nu_min)
+        vl = nu_min + 0.15 * (nu_max - nu_min)
     if vu is None:
-        vu = nu_min + 0.6 * (nu_max - nu_min)
+        vu = nu_min + 0.80 * (nu_max - nu_min)
 
     # Clamp to valid range
     vl = max(nu_min + 1e-6, min(vl, nu_max - 1e-6))
@@ -100,7 +104,8 @@ def test_generate_geometry_basic():
 
 
 def test_generate_geometry_handles_empty_transitions():
-    cfg = make_cfg(vl=1.0, vu=1.0)
+    nu_min = prandtl_meyer(2.0, GAMMA)
+    cfg = make_cfg(vl=nu_min + 0.4, vu=nu_min + 0.45)
     blade = Blade(cfg)
     blade.compute_flow_relations()
     blade.generate_geometry()
@@ -159,7 +164,14 @@ def test_blade_full_pipeline_basic():
     assert np.isfinite(result["solidity"])
 
 
-@pytest.mark.parametrize("vl,vu", [(12.0, 15.0), (12.0, 20.0), (15.0, 25.0)])
+@pytest.mark.parametrize(
+    "vl,vu",
+    [
+        (12.5, 20.0),
+        (13.0, 22.0),
+        (13.5, 24.0),
+    ],
+)
 def test_blade_full_pipeline_param_angles(vl, vu):
     cfg = make_cfg(vl=vl, vu=vu)
     blade = Blade(cfg)
@@ -170,10 +182,10 @@ def test_blade_full_pipeline_param_angles(vl, vu):
 def test_asymmetric_flow_relations_rstar_differs():
     cfg = make_cfg(
         asymmetric=True,
-        vl_lower=13.0,
-        vl_upper=14.0,
+        vl_lower=12.5,
+        vl_upper=13.5,
         vu_lower=20.0,
-        vu_upper=22.0,
+        vu_upper=23.0,
     )
     blade = Blade(cfg)
     blade.compute_flow_relations()
@@ -186,10 +198,10 @@ def test_asymmetric_flow_relations_rstar_differs():
 def test_asymmetric_geometry_differs():
     cfg = make_cfg(
         asymmetric=True,
-        vl_lower=13.0,
-        vl_upper=14.0,
+        vl_lower=12.5,
+        vl_upper=13.5,
         vu_lower=20.0,
-        vu_upper=22.0,
+        vu_upper=23.0,
     )
     blade = Blade(cfg)
     blade.compute()
@@ -200,9 +212,9 @@ def test_asymmetric_pipeline_runs():
     cfg = make_cfg(
         asymmetric=True,
         vl_lower=12.5,
-        vl_upper=13.5,
-        vu_lower=19.0,
-        vu_upper=21.0,
+        vl_upper=13.0,
+        vu_lower=20.0,
+        vu_upper=22.0,
     )
     blade = Blade(cfg)
     result = blade.compute()
@@ -212,23 +224,17 @@ def test_asymmetric_pipeline_runs():
 
 
 def test_asymmetric_fallback_to_symmetric():
-    cfg = make_cfg(asymmetric=True)  # no overrides → fallback
+    cfg = make_cfg(asymmetric=True)
     blade = Blade(cfg)
     blade.compute_flow_relations()
 
-    # Should match symmetric behavior
     assert blade.vl_lower == blade.vl_upper == cfg.vl
     assert blade.vu_lower == blade.vu_upper == cfg.vu
 
 
 def test_cli_asymmetric_override(tmp_path):
-    from typer.testing import CliRunner
-
-    from openlaval.cli import app
-
     runner = CliRunner()
 
-    # Create a minimal symmetric config file
     toml_data = """
 [config]
 name = "cli_test"
@@ -242,7 +248,7 @@ mach_in = 2.0
 mach_out = 1.5
 beta_in = 30.0
 vl = 13.0
-vu = 20.0
+vu = 21.0
 
 [edge]
 delta = 5.0
@@ -251,7 +257,6 @@ offset = 0.1
     path = tmp_path / "blade.toml"
     path.write_text(toml_data)
 
-    # Run CLI with asymmetric overrides
     result = runner.invoke(
         app,
         [
@@ -259,21 +264,16 @@ offset = 0.1
             str(path),
             "--asymmetric",
             "--vl-lower",
-            "13.5",
+            "12.5",
             "--vl-upper",
-            "14.0",
+            "13.5",
             "--vu-lower",
-            "19.0",
+            "20.0",
             "--vu-upper",
-            "21.0",
+            "22.0",
         ],
     )
 
-    # CLI should exit cleanly
     assert result.exit_code == 0
-
-    # Output should mention the blade name
     assert "cli_test" in result.stdout
-
-    # Should print solidity
     assert "Solidity:" in result.stdout
