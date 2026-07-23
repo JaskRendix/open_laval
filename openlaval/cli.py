@@ -9,6 +9,7 @@ import typer
 
 from .blade import Blade, BladeConfig
 from .config import load_config
+from .evaluation import evaluate_blade_performance
 from .io import save_all_results, save_cfd_dat, save_csv_coordinates
 from .plotting import (
     plot_asymmetry,
@@ -282,6 +283,33 @@ def plot_raw(
         )
     except Exception as e:
         typer.echo(f"Error plotting raw geometry: {e}")
+        raise typer.Exit(code=1)
+
+
+@app.command("evaluate")
+def evaluate_cmd(settings: str):
+    """
+    Evaluate aerodynamic and geometric performance metrics for a blade configuration.
+    """
+    cfg = _safe_load_config(settings)
+    try:
+        blade, result = _safe_compute_blade(cfg)
+        metrics = evaluate_blade_performance(result, cfg)
+        
+        typer.echo(f"\n--- Aerodynamic & Geometric Evaluation: {metrics['name']} ---")
+        typer.echo(f"  Chord:                {metrics['chord']:.4f}")
+        typer.echo(f"  Min Thickness:        {metrics['min_thickness']:.4f}")
+        typer.echo(f"  Max Thickness:        {metrics['max_thickness']:.4f}")
+        typer.echo(f"  Solidity:             {metrics['solidity']:.4f}")
+        typer.echo(f"  Inlet Prandtl-Meyer:  {metrics['nu_in']:.2f}°")
+        typer.echo(f"  Outlet Prandtl-Meyer: {metrics['nu_out']:.2f}°")
+        typer.echo(f"  Expansion Delta (Δν): {metrics['delta_nu']:.2f}°")
+        typer.echo(f"  Total Turning Angle:  {metrics['total_turning']:.2f}°")
+        typer.echo(f"  Mass Flow Param (In):  {metrics['mass_flow_param_in']:.4f}")
+        typer.echo(f"  Mass Flow Param (Out): {metrics['mass_flow_param_out']:.4f}")
+        typer.echo(f"  Isentropic Cp (Est):  {metrics['isentropic_cp_est']:.4f}")
+    except Exception as e:
+        typer.echo(f"Evaluation failed: {e}", err=True)
         raise typer.Exit(code=1)
 
 
