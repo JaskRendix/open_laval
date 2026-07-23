@@ -242,7 +242,7 @@ class Blade:
             "max_camber": max_camber,
         }
 
-def compute(self):
+    def compute(self):
         """
         Full blade-generation pipeline with validation checks.
         """
