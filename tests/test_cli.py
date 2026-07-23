@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -192,7 +194,7 @@ mach_in = 2.0
 mach_out = 1.5
 beta_in = 30.0
 vu = 10.0
-vl = 50.0   # invalid: vl > vu
+vl = 50.0    # invalid: vl > vu
 
 [edge]
 delta = 5.0
@@ -383,3 +385,128 @@ def test_cli_plot_asymmetry(tmp_path):
 
     assert result.exit_code == 0
     mock_plot.assert_called_once()
+
+
+def test_cli_plot_curvature_combined(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with (
+        patch("openlaval.cli.Blade") as MockBlade,
+        patch("openlaval.cli.plot_combined_curvature") as mock_plot,
+    ):
+        mock_blade = MagicMock()
+        mock_blade.lower_x = [0, 1]
+        mock_blade.lower_y = [0, -1]
+        mock_blade.upper_x = [0, 1]
+        mock_blade.upper_y = [1, 2]
+        mock_blade.compute.return_value = {
+            "x": [0, 1],
+            "lower": [0, -1],
+            "upper": [1, 2],
+            "solidity": 0.8,
+        }
+        MockBlade.return_value = mock_blade
+
+        result = runner.invoke(app, ["plot-curvature-combined", str(cfg_path)])
+
+    assert result.exit_code == 0
+    mock_plot.assert_called_once()
+
+
+def test_cli_batch(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with patch("openlaval.cli.Blade") as MockBlade:
+        mock_blade = MagicMock()
+        mock_blade.compute.return_value = {
+            "chord": 1.0,
+            "max_thickness": 0.2,
+            "solidity": 0.75,
+        }
+        MockBlade.return_value = mock_blade
+
+        pattern = str(tmp_path / "*.toml")
+        result = runner.invoke(app, ["batch", pattern, "--output-dir", str(tmp_path / "batch_out")])
+
+    assert result.exit_code == 0
+    assert "Batch Summary" in result.stdout
+
+
+def test_cli_sweep(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with patch("openlaval.cli.Blade") as MockBlade:
+        mock_blade = MagicMock()
+        mock_blade.compute.return_value = {
+            "chord": 1.0,
+            "max_thickness": 0.2,
+            "solidity": 0.75,
+        }
+        MockBlade.return_value = mock_blade
+
+        result = runner.invoke(
+            app,
+            [
+                "sweep",
+                str(cfg_path),
+                "--param",
+                "mach_in",
+                "--start",
+                "1.5",
+                "--end",
+                "2.5",
+                "--steps",
+                "3",
+                "--output-dir",
+                str(tmp_path / "sweep_out"),
+            ],
+        )
+
+    assert result.exit_code == 0
+    assert "Sweep completed successfully" in result.stdout
+    assert (tmp_path / "sweep_out" / "sweep_mach_in_summary.csv").exists()
+
+
+def test_cli_export_cad(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with (
+        patch("openlaval.cli.Blade") as MockBlade,
+        patch("openlaval.cli.save_cfd_dat") as mock_dat,
+        patch("openlaval.cli.save_csv_coordinates") as mock_csv,
+    ):
+        mock_blade = MagicMock()
+        mock_blade.compute.return_value = {
+            "x": [0, 1],
+            "lower": [0, -1],
+            "upper": [1, 2],
+            "solidity": 0.8,
+        }
+        MockBlade.return_value = mock_blade
+
+        result = runner.invoke(app, ["export-cad", str(cfg_path), "--outdir", str(tmp_path)])
+
+    assert result.exit_code == 0
+    mock_dat.assert_called_once()
+    mock_csv.assert_called_once()
+    assert "Successfully exported CAD/CFD formats" in result.stdout
+
+
+def test_cli_validate(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with patch("openlaval.cli.Blade") as MockBlade:
+        mock_blade = MagicMock()
+        mock_blade.compute.return_value = {
+            "x": [0, 1],
+            "lower": [0, -1],
+            "upper": [1, 2],
+            "max_thickness": 0.5,
+            "solidity": 0.8,
+        }
+        MockBlade.return_value = mock_blade
+
+        result = runner.invoke(app, ["validate", str(cfg_path)])
+
+    assert result.exit_code == 0
+    assert "Validation PASSED" in result.stdout
