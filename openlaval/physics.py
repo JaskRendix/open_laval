@@ -178,3 +178,48 @@ def vl_minimum(gamma: float) -> float:
         1 / Mlmin, gamma
     )
     return np.degrees(nu_min_rad)
+
+
+def mass_flow_parameter(M: float, gamma: float) -> float:
+    """
+    Compute non-dimensional mass flow parameter q(M) = m*sqrt(T0)/(A*P0).
+    """
+    term = (gamma + 1) / 2
+    exponent = -(gamma + 1) / (2 * (gamma - 1))
+    return np.sqrt(gamma) * M * (1 + (gamma - 1) / 2 * M**2) ** exponent * term**exponent
+
+
+def compute_turning_angles(
+    beta_in_deg: float, 
+    M_in: float, 
+    M_out: float, 
+    gamma: float
+) -> dict[str, float]:
+    """
+    Estimate exit flow angle, total turning angle, and theoretical 
+    supersonic impulse blade turning parameters.
+    """
+    nu_in = prandtl_meyer(M_in, gamma)
+    nu_out = prandtl_meyer(M_out, gamma)
+    delta_nu = nu_out - nu_in
+    turning_angle = beta_in_deg + delta_nu
+    
+    return {
+        "nu_in": nu_in,
+        "nu_out": nu_out,
+        "delta_nu": delta_nu,
+        "total_turning": turning_angle,
+    }
+
+
+def compute_isentropic_pressure_coef(M: float, M_ref: float, gamma: float) -> float:
+    """
+    Compute compressible pressure coefficient Cp relative to inlet reference conditions.
+    """
+    def pressure_ratio(mach: float) -> float:
+        return (1 + (gamma - 1) / 2 * mach**2) ** (-gamma / (gamma - 1))
+    
+    p_inf = pressure_ratio(M_ref)
+    p = pressure_ratio(M)
+    q_inf = 0.5 * gamma * M_ref**2 * p_inf
+    return (p - p_inf) / q_inf
