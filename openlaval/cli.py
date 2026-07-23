@@ -1,3 +1,4 @@
+import glob
 from pathlib import Path
 
 import numpy as np
@@ -91,6 +92,46 @@ def run(
 
     typer.echo(f"Computed blade: {cfg.name}")
     typer.echo(f"Solidity: {result['solidity']:.4f}")
+
+
+@app.command()
+def batch(
+    pattern: str = typer.Argument(..., help="Glob pattern for config files, e.g., 'configs/*.toml'"),
+    output_dir: str = typer.Option("output_batch", help="Directory to save batch results"),
+):
+    """
+    Run a batch of configuration files and summarize their geometric metrics.
+    """
+    files = glob.glob(pattern)
+    if not files:
+        typer.echo(f"No configuration files found matching pattern: {pattern}", err=True)
+        raise typer.Exit(code=1)
+
+    out_path = Path(output_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+
+    typer.echo(f"Found {len(files)} configurations. Running batch...")
+
+    summary_data = []
+
+    for file_path in files:
+        try:
+            cfg = _safe_load_config(file_path)
+            blade, result = _safe_compute_blade(cfg)
+            
+            summary_data.append({
+                "file": file_path,
+                "chord": result.get("chord"),
+                "max_thickness": result.get("max_thickness"),
+                "solidity": result.get("solidity"),
+            })
+            typer.echo(f"  [SUCCESS] {file_path}")
+        except Exception as e:
+            typer.echo(f"  [ERROR] {file_path}: {e}", err=True)
+
+    typer.echo("\n--- Batch Summary ---")
+    for item in summary_data:
+        typer.echo(f"{item['file']} -> Chord: {item['chord']:.3f}, Thick: {item['max_thickness']:.3f}, Solidity: {item['solidity']:.3f}")
 
 
 @app.command()
