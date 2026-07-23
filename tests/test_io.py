@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 
 import numpy as np
@@ -10,6 +12,8 @@ from openlaval.io import (
     save_contour_excel,
     save_metadata,
     save_raw_geometry,
+    save_cfd_dat,
+    save_csv_coordinates,
 )
 
 
@@ -111,7 +115,6 @@ def test_save_all_results_csv_only(tmp_path):
         save_excel=False,
     )
 
-    # Check files
     assert (tmp_path / "bladeA_contour.csv").exists()
     assert not (tmp_path / "bladeA_contour.xlsx").exists()
     assert (tmp_path / "bladeA_raw_geometry.csv").exists()
@@ -152,23 +155,24 @@ def test_save_all_results_with_excel(tmp_path):
 
 def test_save_contour_csv_empty_arrays(tmp_path):
     path = tmp_path / "empty.csv"
-    save_contour_csv(path, [], [], [])
+    save_contour_csv(path, np.array([]), np.array([]), np.array([]))
     df = pd.read_csv(path)
     assert df.empty
 
 
 def test_save_raw_geometry_empty_arrays(tmp_path):
     path = tmp_path / "empty_raw.csv"
-    save_raw_geometry(path, [], [], [], [])
+    save_raw_geometry(path, np.array([]), np.array([]), np.array([]), np.array([]))
     df = pd.read_csv(path)
     assert df.empty
 
 
 def test_save_all_results_creates_directory(tmp_path):
     outdir = tmp_path / "nested" / "deep"
-    x = [0, 1]
-    lower = [0, -1]
-    upper = [1, 2]
+    # Use numpy arrays instead of raw lists to match expected array operations
+    x = np.array([0.0, 1.0])
+    lower = np.array([0.0, -1.0])
+    upper = np.array([1.0, 2.0])
 
     save_all_results(
         outdir=outdir,
@@ -185,3 +189,22 @@ def test_save_all_results_creates_directory(tmp_path):
     )
 
     assert (outdir / "bladeC_contour.csv").exists()
+    assert (outdir / "bladeC_profile.dat").exists()
+    assert (outdir / "bladeC_coordinates.csv").exists()
+
+
+def test_save_cfd_dat_and_csv_coordinates(tmp_path):
+    x = np.array([0.0, 0.5, 1.0])
+    lower = np.array([0.0, -0.1, 0.0])
+    upper = np.array([0.0, 0.2, 0.0])
+
+    dat_path = save_cfd_dat(tmp_path, "testblade", x, lower, upper)
+    csv_path = save_csv_coordinates(tmp_path, "testblade", x, lower, upper)
+
+    assert dat_path.exists()
+    assert csv_path.exists()
+
+    df = pd.read_csv(csv_path)
+    assert "thickness" in df.columns
+    assert "camber" in df.columns
+    assert len(df) == 3
