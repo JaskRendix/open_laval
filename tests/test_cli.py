@@ -495,18 +495,15 @@ def test_cli_export_cad(tmp_path):
 def test_cli_validate(tmp_path):
     cfg_path = write_config(tmp_path)
 
-    with patch("openlaval.cli.Blade") as MockBlade:
+    with (
+        patch("openlaval.cli.Blade") as MockBlade,
+        patch("openlaval.cli.validate_blade") as mock_validate,
+    ):
         mock_blade = MagicMock()
-        mock_blade.compute.return_value = {
-            "x": [0, 1],
-            "lower": [0, -1],
-            "upper": [1, 2],
-            "max_thickness": 0.5,
-            "solidity": 0.8,
-        }
         MockBlade.return_value = mock_blade
 
         result = runner.invoke(app, ["validate", str(cfg_path)])
 
     assert result.exit_code == 0
+    mock_validate.assert_called_once()
     assert "Validation PASSED" in result.stdout
