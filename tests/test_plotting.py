@@ -41,11 +41,16 @@ def sample_arrays():
             plotting.plot_curvature,
             (np.linspace(0, 1, 10), np.sin(np.linspace(0, 1, 10))),
         ),
+        (
+            plotting.plot_combined_curvature,
+            (np.linspace(0, 1, 10), np.sin(np.linspace(0, 1, 10)), np.linspace(0, 1, 10), np.cos(np.linspace(0, 1, 10))),
+        ),
         (plotting.plot_asymmetry, (np.arange(5), np.zeros(5), np.ones(5))),
     ],
 )
 def test_plot_functions_no_save(func, args, tmp_path):
     func(*args)  # Should not raise
+    plt.close("all")
 
 
 @pytest.mark.parametrize(
@@ -73,6 +78,11 @@ def test_plot_functions_no_save(func, args, tmp_path):
             (np.linspace(0, 1, 10), np.sin(np.linspace(0, 1, 10))),
             "curv.png",
         ),
+        (
+            plotting.plot_combined_curvature,
+            (np.linspace(0, 1, 10), np.sin(np.linspace(0, 1, 10)), np.linspace(0, 1, 10), np.cos(np.linspace(0, 1, 10))),
+            "combined_curv.png",
+        ),
         (plotting.plot_asymmetry, (np.arange(5), np.zeros(5), np.ones(5)), "asym.png"),
     ],
 )
@@ -80,6 +90,7 @@ def test_plot_functions_with_save(func, args, filename, tmp_path):
     save_path = tmp_path / filename
     func(*args, save_path=str(save_path))
     assert save_path.exists()
+    plt.close("all")
 
 
 def test_plot_raw_vs_interp(tmp_path):
@@ -102,6 +113,7 @@ def test_plot_raw_vs_interp(tmp_path):
     )
 
     assert save_path.exists()
+    plt.close("all")
 
 
 def test_plot_prandtl_meyer(tmp_path):
@@ -114,6 +126,7 @@ def test_plot_prandtl_meyer(tmp_path):
         1.4,
         mach_points={"Inlet": 2.0, "Exit": 3.0},
     )
+    plt.close("all")
 
 
 def test_show_branch(monkeypatch):
@@ -127,6 +140,7 @@ def test_show_branch(monkeypatch):
     plotting.plot_contour(x, y, x, y)
     plotting.plot_interpolated_contour(x, y, y)
     plotting.plot_characteristics(x, y, x, y)
+    plt.close("all")
 
 
 @pytest.fixture
@@ -134,3 +148,10 @@ def non_headless(monkeypatch):
     """Force non-headless backend so plt.show() branch executes."""
     monkeypatch.setattr(matplotlib, "get_backend", lambda: "qt5agg")
     monkeypatch.setattr(plt, "show", lambda: None)  # prevent GUI
+
+
+def test_plot_combined_curvature_show(non_headless):
+    """Test combined curvature execution with show branch."""
+    x = np.linspace(0, 1, 10)
+    plotting.plot_combined_curvature(x, np.sin(x), x, np.cos(x))
+    plt.close("all")
