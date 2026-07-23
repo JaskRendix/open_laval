@@ -37,7 +37,7 @@ def make_cfg(
     nu_min = min(nu_in, nu_out)
     nu_max = max(nu_in, nu_out)
 
-    # Default values chosen to ensure positive geometric thickness
+    # Default symmetric values chosen to ensure positive thickness
     if vl is None:
         vl = nu_min + 0.15 * (nu_max - nu_min)
     if vu is None:
@@ -164,14 +164,7 @@ def test_blade_full_pipeline_basic():
     assert np.isfinite(result["solidity"])
 
 
-@pytest.mark.parametrize(
-    "vl,vu",
-    [
-        (12.5, 20.0),
-        (13.0, 22.0),
-        (13.5, 24.0),
-    ],
-)
+@pytest.mark.parametrize("vl,vu", [(12.5, 20.0), (13.0, 22.0), (13.5, 24.0)])
 def test_blade_full_pipeline_param_angles(vl, vu):
     cfg = make_cfg(vl=vl, vu=vu)
     blade = Blade(cfg)
@@ -224,10 +217,11 @@ def test_asymmetric_pipeline_runs():
 
 
 def test_asymmetric_fallback_to_symmetric():
-    cfg = make_cfg(asymmetric=True)
+    cfg = make_cfg(asymmetric=True)  # no overrides → fallback
     blade = Blade(cfg)
     blade.compute_flow_relations()
 
+    # Should match symmetric behavior
     assert blade.vl_lower == blade.vl_upper == cfg.vl
     assert blade.vu_lower == blade.vu_upper == cfg.vu
 
@@ -235,6 +229,7 @@ def test_asymmetric_fallback_to_symmetric():
 def test_cli_asymmetric_override(tmp_path):
     runner = CliRunner()
 
+    # Create a minimal symmetric config file
     toml_data = """
 [config]
 name = "cli_test"
@@ -257,6 +252,7 @@ offset = 0.1
     path = tmp_path / "blade.toml"
     path.write_text(toml_data)
 
+    # Run CLI with asymmetric overrides
     result = runner.invoke(
         app,
         [
@@ -274,6 +270,11 @@ offset = 0.1
         ],
     )
 
+    # CLI should exit cleanly
     assert result.exit_code == 0
+
+    # Output should mention the blade name
     assert "cli_test" in result.stdout
+
+    # Should print solidity
     assert "Solidity:" in result.stdout
