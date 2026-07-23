@@ -51,8 +51,8 @@ These angles must satisfy the physical constraint
 \]
 
 
-where $\nu_{\min}$ and $\nu_{\max}$ are the Prandtl–Meyer angles
-corresponding to $M_{\mathrm{in}}$ and $M_{\mathrm{out}}$.
+where $\nu_{\min} = \min(\nu(M_{\mathrm{in}}), \nu(M_{\mathrm{out}}))$ and 
+$\nu_{\max} = \max(\nu(M_{\mathrm{in}}), \nu(M_{\mathrm{out}}))$.
 
 \section{Design Procedure}
 
@@ -80,12 +80,13 @@ In the asymmetric formulation, the designer specifies four angles:
 
 
 
-These define the amount of expansion on each surface.
+These define the amount of expansion on each surface, which must individually satisfy 
+$\nu_{\min} \le \nu_{l} < \nu_{u} \le \nu_{\max}$.
 Because the characteristic curves depend directly on these angles,
 the resulting geometry differs between the upper and lower sides.
 
-OpenLaval validates all four angles to ensure they lie within the physically
-admissible Prandtl–Meyer range.
+OpenLaval validates all angles to ensure they lie within the physically
+admissible Prandtl–Meyer span defined by inlet and outlet conditions.
 
 \section{Shock-Cancelling Curves}
 
