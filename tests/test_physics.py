@@ -12,6 +12,9 @@ from openlaval.physics import (
     vl_minimum,
     vortex_C,
     vortex_Q,
+    mass_flow_parameter,
+    compute_turning_angles,
+    compute_isentropic_pressure_coef,
 )
 
 GAMMA = 1.4
@@ -83,3 +86,29 @@ def test_vl_minimum_reasonable_range():
     nu_max = np.degrees(0.5 * np.pi * (np.sqrt((GAMMA + 1) / (GAMMA - 1)) - 1))
     assert np.isfinite(nu_min)
     assert 0 <= nu_min < nu_max
+
+
+def test_mass_flow_parameter_positive():
+    m_dot = mass_flow_parameter(2.0, GAMMA)
+    assert np.isfinite(m_dot)
+    assert m_dot > 0
+
+
+def test_compute_turning_angles():
+    beta_in = 60.0
+    M_in = 1.8
+    M_out = 2.2
+    turning = compute_turning_angles(beta_in, M_in, M_out, GAMMA)
+    
+    assert "nu_in" in turning
+    assert "nu_out" in turning
+    assert "delta_nu" in turning
+    assert "total_turning" in turning
+    
+    assert turning["delta_nu"] > 0
+    assert turning["total_turning"] > beta_in
+
+
+def test_compute_isentropic_pressure_coef():
+    cp = compute_isentropic_pressure_coef(M=2.2, M_ref=1.8, gamma=GAMMA)
+    assert np.isfinite(cp)
