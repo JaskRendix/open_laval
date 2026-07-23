@@ -11,6 +11,7 @@ from .plotting import (
     plot_asymmetry,
     plot_camber,
     plot_characteristics,
+    plot_combined_curvature,
     plot_contour,
     plot_curvature,
     plot_interpolated_contour,
@@ -340,6 +341,29 @@ def plot_curvature_cmd(settings: str):
         title=f"Curvature Upper — {cfg.name}",
         save_path=f"result/{cfg.name}_curv_upper.png" if cfg.save_fig else None,
     )
+
+
+@app.command("plot-curvature-combined")
+def plot_curvature_combined_cmd(settings: str):
+    """
+    Plot upper and lower surface curvatures in a single comparative figure.
+    """
+    cfg = _safe_load_config(settings)
+    blade, result = _safe_compute_blade(cfg)
+
+    try:
+        plot_combined_curvature(
+            blade.lower_x,
+            blade.lower_y,
+            blade.upper_x,
+            blade.upper_y,
+            title=f"Comparative Curvature — {cfg.name}",
+            save_path=f"result/{cfg.name}_curv_combined.png" if cfg.save_fig else None,
+        )
+        typer.echo(f"Successfully generated combined curvature plot for {cfg.name}")
+    except Exception as e:
+        typer.echo(f"Error plotting combined curvature: {e}", err=True)
+        raise typer.Exit(code=1)
 
 
 @app.command("plot-raw-vs-interp")
