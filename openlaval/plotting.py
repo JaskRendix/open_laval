@@ -232,6 +232,48 @@ def plot_raw_vs_interp(
         plt.show()
 
 
+def plot_combined_curvature(x_lower, y_lower, x_upper, y_upper, title="Blade Curvature", save_path=None):
+    """
+    Plot upper and lower surface curvatures in a synchronized dual-subplot layout.
+    """
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+
+    # Compute lower curvature (using finite differences)
+    dx_l = np.gradient(x_lower)
+    dy_l = np.gradient(y_lower)
+    ddx_l = np.gradient(dx_l)
+    ddy_l = np.gradient(dy_l)
+    curv_lower = (dx_l * ddy_l - dy_l * ddx_l) / (dx_l**2 + dy_l**2)**1.5
+
+    # Compute upper curvature
+    dx_u = np.gradient(x_upper)
+    dy_u = np.gradient(y_upper)
+    ddx_u = np.gradient(dx_u)
+    ddy_u = np.gradient(dy_u)
+    curv_upper = (dx_u * ddy_u - dy_u * ddx_u) / (dx_u**2 + dy_u**2)**1.5
+
+    ax1.plot(x_lower, curv_lower, color="tab:blue", lw=2)
+    ax1.set_title("Lower Surface Curvature")
+    ax1.set_ylabel("Curvature")
+    ax1.grid(True, linestyle="--", alpha=0.6)
+
+    ax2.plot(x_upper, curv_upper, color="tab:orange", lw=2)
+    ax2.set_title("Upper Surface Curvature")
+    ax2.set_xlabel("x")
+    ax2.set_ylabel("Curvature")
+    ax2.grid(True, linestyle="--", alpha=0.6)
+
+    fig.suptitle(title, fontsize=14, fontweight="bold")
+    plt.tight_layout()
+
+    if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_path, dpi=300)
+        plt.close()
+    else:
+        plt.show()
+
+
 def plot_asymmetry(x, lower, upper, title="Asymmetry (Upper - Lower)", save_path=None):
     diff = upper - lower
 
