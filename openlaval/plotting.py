@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,8 +35,8 @@ def plot_contour(
     plt.grid(True)
     plt.legend()
 
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    if save_:
+        plt.savefig(save_, dpi=300, bbox_inches="tight")
 
     if not _is_headless():
         plt.show()
@@ -45,7 +47,7 @@ def plot_interpolated_contour(
     lower,
     upper,
     title: str = "Interpolated Blade Contour",
-    save_path: str | None = None,
+    save_: str | None = None,
 ):
     """
     Plot interpolated blade contour.
@@ -61,15 +63,15 @@ def plot_interpolated_contour(
     plt.grid(True)
     plt.legend()
 
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    if save_:
+        plt.savefig(save_, dpi=300, bbox_inches="tight")
 
     if not _is_headless():
         plt.show()
 
 
 def plot_characteristics(
-    x0, y0, x1, y1, title: str = "Characteristic Lines", save_path: str | None = None
+    x0, y0, x1, y1, title: str = "Characteristic Lines", save_: str | None = None
 ):
     """
     Plot two characteristic lines.
@@ -85,7 +87,7 @@ def plot_characteristics(
     plt.grid(True)
     plt.legend()
 
-    if save_path:
+    if save_:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
     if not _is_headless():
