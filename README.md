@@ -249,6 +249,6 @@ The refactored version provides a modular structure suitable for extension.
 
 Possible future additions:
 
-* evaluation functions
 * additional export formats
 * validation against published cascade data
+* automated blade optimization workflows
