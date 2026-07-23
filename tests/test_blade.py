@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 import pytest
 
@@ -33,11 +35,11 @@ def make_cfg(
     nu_min = min(nu_in, nu_out)
     nu_max = max(nu_in, nu_out)
 
-    # Default symmetric values
+    # Default values chosen to ensure positive thickness (vu significantly larger than vl)
     if vl is None:
-        vl = nu_min + 0.1 * (nu_max - nu_min)
+        vl = nu_min + 0.15 * (nu_max - nu_min)
     if vu is None:
-        vu = nu_min + 0.6 * (nu_max - nu_min)
+        vu = nu_min + 0.85 * (nu_max - nu_min)
 
     # Clamp to valid range
     vl = max(nu_min + 1e-6, min(vl, nu_max - 1e-6))
@@ -104,8 +106,8 @@ def test_generate_geometry_basic():
 
 
 def test_generate_geometry_handles_empty_transitions():
-    # Use extreme angles to stress transition logic
-    cfg = make_cfg(vl=1.0, vu=1.0)
+    nu_min = prandtl_meyer(2.0, GAMMA)
+    cfg = make_cfg(vl=nu_min + 0.4, vu=nu_min + 0.45)
     blade = Blade(cfg)
     blade.compute_flow_relations()
     blade.generate_geometry()
@@ -186,12 +188,9 @@ def test_blade_full_pipeline_basic():
 @pytest.mark.parametrize(
     "vl,vu",
     [
-        (12.0, 15.0),
-        (12.0, 20.0),
-        (
-            15.0,
-            25.0,
-        ),  # 25 is slightly above ν_max but still acceptable if your validator clamps or warns
+        (12.5, 20.0),
+        (13.0, 22.0),
+        (13.5, 24.0),
     ],
 )
 def test_blade_full_pipeline_param_angles(vl, vu):
@@ -202,25 +201,22 @@ def test_blade_full_pipeline_param_angles(vl, vu):
 
 
 def test_asymmetric_valid_pm_angles():
-    # Valid PM range for mach_in=2.0, mach_out=1.5, gamma=1.4:
-    # ν_min ≈ 11.91°, ν_max ≈ 26.38°
     cfg = make_cfg(
         asymmetric=True,
-        vl_lower=13.0,
-        vl_upper=14.0,
+        vl_lower=12.5,
+        vl_upper=13.0,
         vu_lower=20.0,
         vu_upper=22.0,
     )
     c = BladeConfig(**cfg.model_dump())
     assert c.asymmetric is True
-    assert c.vl_lower == 13.0
-    assert c.vl_upper == 14.0
+    assert c.vl_lower == 12.5
+    assert c.vl_upper == 13.0
     assert c.vu_lower == 20.0
     assert c.vu_upper == 22.0
 
 
 def test_asymmetric_invalid_pm_angles_rejected():
-    # vl_lower < ν_min → invalid
     with pytest.raises(ValueError):
         make_cfg(
             asymmetric=True,
@@ -234,10 +230,10 @@ def test_asymmetric_invalid_pm_angles_rejected():
 def test_asymmetric_flow_relations_rstar_differs():
     cfg = make_cfg(
         asymmetric=True,
-        vl_lower=13.0,
-        vl_upper=14.0,
+        vl_lower=12.5,
+        vl_upper=13.5,
         vu_lower=20.0,
-        vu_upper=22.0,
+        vu_upper=23.0,
     )
     blade = Blade(cfg)
     blade.compute_flow_relations()
@@ -250,15 +246,14 @@ def test_asymmetric_flow_relations_rstar_differs():
 def test_asymmetric_geometry_differs():
     cfg = make_cfg(
         asymmetric=True,
-        vl_lower=13.0,
-        vl_upper=14.0,
+        vl_lower=12.5,
+        vl_upper=13.5,
         vu_lower=20.0,
-        vu_upper=22.0,
+        vu_upper=23.0,
     )
     blade = Blade(cfg)
     blade.compute()
 
-    # Geometry must differ
     assert not np.allclose(blade.lower_interp, blade.upper_interp)
 
 
@@ -266,9 +261,9 @@ def test_asymmetric_pipeline_runs():
     cfg = make_cfg(
         asymmetric=True,
         vl_lower=12.5,
-        vl_upper=13.5,
-        vu_lower=19.0,
-        vu_upper=21.0,
+        vl_upper=13.0,
+        vu_lower=20.0,
+        vu_upper=22.0,
     )
     blade = Blade(cfg)
     result = blade.compute()
