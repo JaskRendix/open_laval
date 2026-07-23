@@ -35,11 +35,11 @@ def make_cfg(
     nu_min = min(nu_in, nu_out)
     nu_max = max(nu_in, nu_out)
 
-    # Default values chosen to ensure positive thickness (vu significantly larger than vl)
+    # Default values chosen to ensure positive geometric thickness (wider span)
     if vl is None:
-        vl = nu_min + 0.15 * (nu_max - nu_min)
+        vl = nu_min + 0.10 * (nu_max - nu_min)
     if vu is None:
-        vu = nu_min + 0.85 * (nu_max - nu_min)
+        vu = nu_min + 0.90 * (nu_max - nu_min)
 
     # Clamp to valid range
     vl = max(nu_min + 1e-6, min(vl, nu_max - 1e-6))
