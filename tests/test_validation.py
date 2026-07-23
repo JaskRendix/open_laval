@@ -18,15 +18,14 @@ def naca_l52b06_baseline_config() -> BladeConfig:
     mach_in = 1.57
     nu_in = float(prandtl_meyer(mach_in, gamma))
     
-    # Ensure vl and vu are within valid bounds with vu < vl
     return BladeConfig(
         name="naca_l52b06_baseline",
         gamma=gamma,
         mach_in=mach_in,
         mach_out=mach_in,  # Isentropic impulse reference
         beta_in=60.0,
-        vu=nu_in * 0.5,
-        vl=nu_in * 0.8,
+        vl=nu_in * 0.5,
+        vu=nu_in * 0.8,
         edge_delta=5.0,
         edge_offset=0.1,
         num_points=100,
@@ -82,8 +81,8 @@ def test_validation_parametric_trends(mach_in, beta_in, expected_min_turning):
         mach_in=mach_in,
         mach_out=mach_in,
         beta_in=beta_in,
-        vu=nu_in * 0.5,
-        vl=nu_in * 0.8,
+        vl=nu_in * 0.5,
+        vu=nu_in * 0.8,
         edge_delta=5.0,
         edge_offset=0.1,
         num_points=50,
