@@ -16,7 +16,7 @@ def naca_l52b06_baseline_config() -> BladeConfig:
     """
     gamma = 1.4
     mach_in = 1.57
-    nu_in = np.degrees(prandtl_meyer(mach_in, gamma))
+    nu_in = float(np.degrees(prandtl_meyer(mach_in, gamma)))
     
     return BladeConfig(
         name="naca_l52b06_baseline",
@@ -24,8 +24,8 @@ def naca_l52b06_baseline_config() -> BladeConfig:
         mach_in=mach_in,
         mach_out=mach_in,  # Isentropic impulse reference
         beta_in=60.0,
-        vu=nu_in + 10.0,
-        vl=nu_in + 5.0,
+        vu=nu_in + 2.0,
+        vl=nu_in + 1.0,
         edge_delta=5.0,
         edge_offset=0.1,
         num_points=100,
@@ -73,7 +73,7 @@ def test_validation_parametric_trends(mach_in, beta_in, expected_min_turning):
     to ensure monotonic and physically sound behavior.
     """
     gamma = 1.4
-    nu_in = np.degrees(prandtl_meyer(mach_in, gamma))
+    nu_in = float(np.degrees(prandtl_meyer(mach_in, gamma)))
 
     cfg = BladeConfig(
         name="sweep_regression",
@@ -81,8 +81,8 @@ def test_validation_parametric_trends(mach_in, beta_in, expected_min_turning):
         mach_in=mach_in,
         mach_out=mach_in,
         beta_in=beta_in,
-        vu=nu_in + 12.0,
-        vl=nu_in + 6.0,
+        vu=nu_in + 2.0,
+        vl=nu_in + 1.0,
         edge_delta=5.0,
         edge_offset=0.1,
         num_points=50,
