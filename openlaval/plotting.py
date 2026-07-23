@@ -35,10 +35,11 @@ def plot_contour(
     plt.grid(True)
     plt.legend()
 
-    if save_:
-        plt.savefig(save_, dpi=300, bbox_inches="tight")
-
-    if not _is_headless():
+    if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        plt.close()
+    elif not _is_headless():
         plt.show()
 
 
@@ -47,7 +48,7 @@ def plot_interpolated_contour(
     lower,
     upper,
     title: str = "Interpolated Blade Contour",
-    save_: str | None = None,
+    save_path: str | None = None,
 ):
     """
     Plot interpolated blade contour.
@@ -63,15 +64,16 @@ def plot_interpolated_contour(
     plt.grid(True)
     plt.legend()
 
-    if save_:
-        plt.savefig(save_, dpi=300, bbox_inches="tight")
-
-    if not _is_headless():
+    if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        plt.close()
+    elif not _is_headless():
         plt.show()
 
 
 def plot_characteristics(
-    x0, y0, x1, y1, title: str = "Characteristic Lines", save_: str | None = None
+    x0, y0, x1, y1, title: str = "Characteristic Lines", save_path: str | None = None
 ):
     """
     Plot two characteristic lines.
@@ -87,10 +89,11 @@ def plot_characteristics(
     plt.grid(True)
     plt.legend()
 
-    if save_:
+    if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
-
-    if not _is_headless():
+        plt.close()
+    elif not _is_headless():
         plt.show()
 
 
@@ -101,15 +104,6 @@ def plot_prandtl_meyer(
 ):
     """
     Plot Prandtl–Meyer angle vs Mach number.
-
-    mach_points: optional dict of labeled Mach numbers to highlight.
-        Example:
-            {
-                "Inlet": M_in,
-                "Outlet": M_out,
-                "Upper": M_upper,
-                "Lower": M_lower,
-            }
     """
     from .physics import prandtl_meyer
 
@@ -130,9 +124,10 @@ def plot_prandtl_meyer(
     plt.legend()
 
     if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
-
-    if not _is_headless():
+        plt.close()
+    elif not _is_headless():
         plt.show()
 
 
@@ -149,9 +144,10 @@ def plot_thickness(x, lower, upper, title="Thickness Distribution", save_path=No
     plt.legend()
 
     if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
-
-    if not _is_headless():
+        plt.close()
+    elif not _is_headless():
         plt.show()
 
 
@@ -168,14 +164,14 @@ def plot_camber(x, lower, upper, title="Camber Line", save_path=None):
     plt.legend()
 
     if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
-
-    if not _is_headless():
+        plt.close()
+    elif not _is_headless():
         plt.show()
 
 
 def plot_curvature(x, y, title="Curvature Distribution", save_path=None):
-    # Numerical curvature
     dx = np.gradient(x)
     dy = np.gradient(y)
     ddx = np.gradient(dx)
@@ -193,9 +189,10 @@ def plot_curvature(x, y, title="Curvature Distribution", save_path=None):
     plt.legend()
 
     if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
-
-    if not _is_headless():
+        plt.close()
+    elif not _is_headless():
         plt.show()
 
 
@@ -212,11 +209,8 @@ def plot_raw_vs_interp(
 ):
     plt.figure(figsize=(8, 4))
 
-    # Raw
     plt.plot(raw_x_lower, raw_y_lower, "r--", label="Lower raw")
     plt.plot(raw_x_upper, raw_y_upper, "b--", label="Upper raw")
-
-    # Interpolated
     plt.plot(x_interp, lower_interp, "k-", label="Lower interp")
     plt.plot(x_interp, upper_interp, "g-", label="Upper interp")
 
@@ -228,26 +222,22 @@ def plot_raw_vs_interp(
     plt.legend()
 
     if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
-
-    if not _is_headless():
+        plt.close()
+    elif not _is_headless():
         plt.show()
 
 
 def plot_combined_curvature(x_lower, y_lower, x_upper, y_upper, title="Blade Curvature", save_path=None):
-    """
-    Plot upper and lower surface curvatures in a synchronized dual-subplot layout.
-    """
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
-    # Compute lower curvature (using finite differences)
     dx_l = np.gradient(x_lower)
     dy_l = np.gradient(y_lower)
     ddx_l = np.gradient(dx_l)
     ddy_l = np.gradient(dy_l)
     curv_lower = (dx_l * ddy_l - dy_l * ddx_l) / (dx_l**2 + dy_l**2)**1.5
 
-    # Compute upper curvature
     dx_u = np.gradient(x_upper)
     dy_u = np.gradient(y_upper)
     ddx_u = np.gradient(dx_u)
@@ -272,7 +262,7 @@ def plot_combined_curvature(x_lower, y_lower, x_upper, y_upper, title="Blade Cur
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_path, dpi=300)
         plt.close()
-    else:
+    elif not _is_headless():
         plt.show()
 
 
@@ -289,7 +279,8 @@ def plot_asymmetry(x, lower, upper, title="Asymmetry (Upper - Lower)", save_path
     plt.legend()
 
     if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
-
-    if not _is_headless():
+        plt.close()
+    elif not _is_headless():
         plt.show()
