@@ -249,6 +249,7 @@ The refactored version provides a modular structure suitable for extension.
 
 Possible future additions:
 
-* additional export formats
-* validation against published cascade data
-* automated blade optimization workflows
+* **Evaluation module expansion:** Add advanced aerodynamic metrics (isentropic loss coefficients, shock losses, turning efficiency, and curvature smoothness indices) via `openlaval evaluate <config>`.
+* **Additional export formats:** Support richer CAD/CFD export types (STEP, DXF, STL, and Tecplot/Fluent formats).
+* **Validation against published cascade data:** Benchmark generated blades against historical NTRS datasets (NACA RM L52B06, NASA TN D-4421/4422) using `openlaval validate-cascade <config>`.
+* **Automated blade optimization workflows:** Couple evaluation metrics with optimization routines (like CMA-ES or differential evolution) to maximize turning or minimize losses.
