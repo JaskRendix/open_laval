@@ -496,15 +496,20 @@ def test_cli_validate(tmp_path):
     cfg_path = write_config(tmp_path)
 
     with (
-        patch("openlaval.cli.Blade") as MockBlade,
+        patch("openlaval.cli._safe_load_config") as mock_load,
+        patch("openlaval.cli._safe_compute_blade") as mock_compute,
     ):
+        mock_cfg = MagicMock()
+        mock_cfg.name = "test_blade"
+        mock_load.return_value = mock_cfg
+
         mock_blade = MagicMock()
-        mock_blade.compute.return_value = {
-            "lower": [0, -1],
-            "upper": [1, 2],
+        mock_result = {
+            "lower": [0, 0],
+            "upper": [1, 1],
             "max_thickness": 2.0,
         }
-        MockBlade.return_value = mock_blade
+        mock_compute.return_value = (mock_blade, mock_result)
 
         result = runner.invoke(app, ["validate", str(cfg_path)])
 
