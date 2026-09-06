@@ -11,6 +11,7 @@ from .blade import Blade, BladeConfig
 from .config import load_config
 from .evaluation import evaluate_blade_performance
 from .io import save_all_results, save_cfd_dat, save_csv_coordinates
+from .optimization import optimize_blade_performance
 from .plotting import (
     plot_asymmetry,
     plot_camber,
@@ -285,6 +286,44 @@ def plot_raw(
         )
     except Exception as e:
         typer.echo(f"Error plotting raw geometry: {e}")
+        raise typer.Exit(code=1)
+
+
+@app.command("optimize")
+def optimize_cmd(
+    settings: str,
+    method: str = typer.Option("Nelder-Mead", help="Optimization algorithm method."),
+    maxiter: int = typer.Option(50, help="Maximum optimization iterations."),
+    output_dir: str = typer.Option(
+        "output_optimize", help="Directory for optimized results."
+    ),
+):
+    """
+    Run automated blade performance optimization on design variables.
+    """
+    cfg = _safe_load_config(settings)
+    out_path = Path(output_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+
+    typer.echo(f"Starting blade optimization for {cfg.name} using {method}...")
+
+    try:
+        opt_results = optimize_blade_performance(
+            cfg, design_vars=["vu", "vl"], method=method, maxiter=maxiter
+        )
+
+        typer.echo(f"\n--- Optimization Summary ---")
+        typer.echo(f"  Success:                {opt_results['success']}")
+        typer.echo(f"  Optimized Parameters:   {opt_results['optimized_parameters']}")
+        typer.echo(
+            f"  Final Efficiency:       {opt_results['final_metrics']['turning_efficiency'] * 100:.2f}%"
+        )
+        typer.echo(
+            f"  Total Loss Coeff:       {opt_results['final_metrics']['shock_loss_coefficient'] + opt_results['final_metrics']['profile_loss_coefficient']:.4f}"
+        )
+
+    except Exception as e:
+        typer.echo(f"Optimization failed: {e}", err=True)
         raise typer.Exit(code=1)
 
 

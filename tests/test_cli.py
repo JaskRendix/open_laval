@@ -602,3 +602,27 @@ def test_cli_validate_cascade(tmp_path):
     assert result.exit_code == 0
     assert "Historical Cascade Benchmark: testblade" in result.stdout
     assert "NACA RM L52B06" in result.stdout
+
+
+def test_cli_optimize(tmp_path):
+    cfg_path = write_config(tmp_path)
+
+    with patch("openlaval.cli.optimize_blade_performance") as mock_opt:
+        mock_opt.return_value = {
+            "success": True,
+            "message": "Optimization terminated successfully.",
+            "optimized_parameters": {"vu": 21.5, "vl": 11.2},
+            "initial_objective": 0.05,
+            "final_metrics": {
+                "turning_efficiency": 0.96,
+                "shock_loss_coefficient": 0.015,
+                "profile_loss_coefficient": 0.015,
+            },
+        }
+
+        result = runner.invoke(app, ["optimize", str(cfg_path)])
+
+    assert result.exit_code == 0
+    mock_opt.assert_called_once()
+    assert "Optimization Summary" in result.stdout
+    assert "Success:" in result.stdout
