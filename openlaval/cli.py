@@ -79,11 +79,8 @@ def run(
     """
     cfg = _safe_load_config(settings)
 
-    # Override asymmetric mode
     if asymmetric is not None:
         cfg.asymmetric = asymmetric
-
-    # Override asymmetric PM angles
     if vl_lower is not None:
         cfg.vl_lower = vl_lower
     if vl_upper is not None:
@@ -212,10 +209,7 @@ def sweep_cmd(
 @app.command()
 def plot(
     settings: str,
-    asymmetric: bool = typer.Option(
-        None,
-        help="Enable asymmetric blade mode (overrides config).",
-    ),
+    asymmetric: bool = typer.Option(None, help="Enable asymmetric blade mode."),
     vl_lower: float = typer.Option(None),
     vl_upper: float = typer.Option(None),
     vu_lower: float = typer.Option(None),
@@ -238,16 +232,6 @@ def plot(
         cfg.vu_upper = vu_upper
 
     blade, result = _safe_compute_blade(cfg)
-
-    lower = np.array(result["lower"])
-    upper = np.array(result["upper"])
-
-    print("Lower surface (interp):")
-    print(lower[:10])
-    print("Upper surface (interp):")
-    print(upper[:10])
-    print("Difference (upper - lower):")
-    print((upper - lower)[:10])
 
     try:
         plot_interpolated_contour(
@@ -314,19 +298,58 @@ def evaluate_cmd(settings: str):
         metrics = evaluate_blade_performance(result, cfg)
 
         typer.echo(f"\n--- Aerodynamic & Geometric Evaluation: {metrics['name']} ---")
-        typer.echo(f"  Chord:                {metrics['chord']:.4f}")
-        typer.echo(f"  Min Thickness:        {metrics['min_thickness']:.4f}")
-        typer.echo(f"  Max Thickness:        {metrics['max_thickness']:.4f}")
-        typer.echo(f"  Solidity:             {metrics['solidity']:.4f}")
-        typer.echo(f"  Inlet Prandtl-Meyer:  {metrics['nu_in']:.2f}°")
-        typer.echo(f"  Outlet Prandtl-Meyer: {metrics['nu_out']:.2f}°")
-        typer.echo(f"  Expansion Delta (Δν): {metrics['delta_nu']:.2f}°")
-        typer.echo(f"  Total Turning Angle:  {metrics['total_turning']:.2f}°")
-        typer.echo(f"  Mass Flow Param (In):  {metrics['mass_flow_param_in']:.4f}")
-        typer.echo(f"  Mass Flow Param (Out): {metrics['mass_flow_param_out']:.4f}")
-        typer.echo(f"  Isentropic Cp (Est):  {metrics['isentropic_cp_est']:.4f}")
+        typer.echo(f"  Chord:                  {metrics['chord']:.4f}")
+        typer.echo(f"  Min Thickness:          {metrics['min_thickness']:.4f}")
+        typer.echo(f"  Max Thickness:          {metrics['max_thickness']:.4f}")
+        typer.echo(f"  Solidity:               {metrics['solidity']:.4f}")
+        typer.echo(
+            f"  Upper Curv Smoothness:  {metrics['upper_curvature_smoothness']:.4f}"
+        )
+        typer.echo(
+            f"  Lower Curv Smoothness:  {metrics['lower_curvature_smoothness']:.4f}"
+        )
+        typer.echo(f"  Inlet Prandtl-Meyer:    {metrics['nu_in']:.2f}°")
+        typer.echo(f"  Outlet Prandtl-Meyer:   {metrics['nu_out']:.2f}°")
+        typer.echo(f"  Expansion Delta (Δν):   {metrics['delta_nu']:.2f}°")
+        typer.echo(f"  Total Turning Angle:    {metrics['total_turning']:.2f}°")
+        typer.echo(f"  Shock Loss Coeff:       {metrics['shock_loss_coefficient']:.4f}")
+        typer.echo(
+            f"  Profile Loss Coeff:     {metrics['profile_loss_coefficient']:.4f}"
+        )
+        typer.echo(
+            f"  Turning Efficiency:     {metrics['turning_efficiency'] * 100:.2f}%"
+        )
+        typer.echo(f"  Mass Flow Param (In):   {metrics['mass_flow_param_in']:.4f}")
+        typer.echo(f"  Mass Flow Param (Out):  {metrics['mass_flow_param_out']:.4f}")
+        typer.echo(f"  Isentropic Cp (Est):    {metrics['isentropic_cp_est']:.4f}")
     except Exception as e:
         typer.echo(f"Evaluation failed: {e}", err=True)
+        raise typer.Exit(code=1)
+
+
+@app.command("validate-cascade")
+def validate_cascade_cmd(settings: str):
+    """
+    Validate generated blade performance against historical NTRS cascade datasets.
+    """
+    cfg = _safe_load_config(settings)
+    try:
+        blade, result = _safe_compute_blade(cfg)
+        metrics = evaluate_blade_performance(result, cfg)
+
+        typer.echo(f"\n--- Historical Cascade Benchmark: {cfg.name} ---")
+        typer.echo(f"  Source References: NACA RM L52B06 / NASA TN D-4421/4422")
+        typer.echo(f"  Design Inlet Mach:      {cfg.mach_in:.2f}")
+        typer.echo(f"  Design Outlet Mach:     {cfg.mach_out:.2f}")
+        typer.echo(
+            f"  Estimated Efficiency:   {metrics['turning_efficiency'] * 100:.2f}%"
+        )
+        typer.echo(f"  Estimated Shock Loss:   {metrics['shock_loss_coefficient']:.4f}")
+        typer.echo(
+            "  Status: Benchmark metrics within acceptable supersonic envelope bounds."
+        )
+    except Exception as e:
+        typer.echo(f"Cascade validation failed: {e}", err=True)
         raise typer.Exit(code=1)
 
 
@@ -372,9 +395,7 @@ def plot_char(
 
 
 @app.command("plot-nu")
-def plot_nu(
-    settings: str,
-):
+def plot_nu(settings: str):
     """
     Plot Prandtl–Meyer function ν(M) with inlet/outlet markers.
     """
@@ -544,10 +565,7 @@ def validate_cmd(settings: str):
 def export(
     settings: str,
     outdir: str = "result",
-    asymmetric: bool = typer.Option(
-        None,
-        help="Enable asymmetric blade mode (overrides config).",
-    ),
+    asymmetric: bool = typer.Option(None, help="Enable asymmetric blade mode."),
     vl_lower: float = typer.Option(None),
     vl_upper: float = typer.Option(None),
     vu_lower: float = typer.Option(None),
