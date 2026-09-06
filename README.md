@@ -1,29 +1,32 @@
-# OpenLaval
+# OpenLaval — Supersonic Impulse Turbine Blade Generator
 
-OpenLaval is a numerical tool for generating **supersonic impulse turbine blade geometry** using the method of characteristics and classical vortex‑flow theory.
+OpenLaval is a numerical tool for generating supersonic impulse turbine blade geometry using the method of characteristics and classical vortex‑flow theory.
 
 It implements the design approach described in several NACA and NASA technical reports and produces upper and lower blade surfaces, interpolated contours, and derived quantities such as solidity.
 
-This repository is a refactored and modular version of the original project published by Interstellar Technologies Inc.:
-
-[https://github.com/istellartech/OpenLaval](https://github.com/istellartech/OpenLaval)
+This repository is a refactored and modular version of the original project published by Interstellar Technologies Inc.:  
+<https://github.com/istellartech/OpenLaval>
 
 ---
 
 ## Features
 
-* Supersonic impulse turbine blade design based on Prandtl–Meyer expansion theory
-* Method of characteristics for upper and lower surface construction
-* Circular arcs, concave/convex transitions, and leading‑edge shaping
-* Interpolated blade contour suitable for CAD or CFD preprocessing
-* Export of geometry, metadata, and CSV files
-* Export of CAD/CFD formats (`.dat` and coordinate CSVs)
-* Plotting of raw geometry, interpolated contours, thickness, camber, curvature, combined curvature, raw‑vs‑interpolated, asymmetry, and Prandtl–Meyer diagrams
-* Automated batch processing of multiple configuration files
-* Parametric design sweeps with CSV summary generation
-* Validation of design constraints and configuration parameters
-* Configuration through a simple TOML file
-* Asymmetric blade support
+- Supersonic impulse turbine blade design based on Prandtl–Meyer expansion theory  
+- Method of characteristics for upper and lower surface construction  
+- Circular arcs, concave/convex transitions, and leading‑edge shaping  
+- Interpolated blade contour suitable for CAD or CFD preprocessing  
+- Aerodynamic performance evaluation (isentropic loss coefficients, shock losses, turning efficiency, curvature smoothness)  
+- Benchmarking and validation against historical NTRS cascade datasets  
+  (NACA RM L52B06, NASA TN D‑4421/4422)  
+- Automated blade performance optimization workflows using `scipy.optimize`  
+- Export of geometry, metadata, and CSV files  
+- Export of CAD/CFD formats (`.dat` and coordinate CSVs)  
+- Plotting of raw geometry, interpolated contours, thickness, camber, curvature, combined curvature, raw‑vs‑interpolated, asymmetry, and Prandtl–Meyer diagrams  
+- Automated batch processing of multiple configuration files  
+- Parametric design sweeps with CSV summary generation  
+- Validation of design constraints and configuration parameters  
+- Configuration through a simple TOML file  
+- Asymmetric blade support  
 
 ---
 
@@ -33,9 +36,8 @@ OpenLaval requires Python 3.12 or newer.
 
 Install in editable mode:
 
-```
+```bash
 pip install -e .
-
 ```
 
 This installs the `openlaval` CLI.
@@ -48,52 +50,46 @@ Prepare a configuration file, for example:
 
 ```
 example.toml
-
 ```
 
-You may also store multiple configurations under a directory such as `configs/`:
+Or store multiple configurations under a directory:
 
 ```
 configs/example.toml
 configs/asymmetric.toml
 configs/high_mach.toml
-
 ```
 
 ### Compute geometry
 
-```
+```bash
 openlaval run configs/example.toml
-
 ```
 
 ### Plot the interpolated blade contour
 
-```
+```bash
 openlaval plot configs/example.toml
-
 ```
 
 If `save_fig = true`, the plot is saved to:
 
 ```
 result/<name>_contour.png
-
 ```
 
 ### Export geometry, metadata, and CSV files
 
-```
+```bash
 openlaval export configs/example.toml --outdir result/
-
 ```
 
 This writes:
 
-* interpolated geometry CSV
-* raw geometry CSV
-* metadata JSON
-* optional Excel file (`save_excel = true`)
+- interpolated geometry CSV  
+- raw geometry CSV  
+- metadata JSON  
+- optional Excel file (`save_excel = true`)  
 
 ---
 
@@ -103,75 +99,51 @@ All plots respect `save_fig = true` and write PNG files to `result/`.
 
 ### Raw geometry
 
-```
+```bash
 openlaval plot-raw <config>
-
 ```
-
-Plots raw MOC‑generated upper and lower surfaces.
 
 ### Thickness distribution
 
-```
+```bash
 openlaval plot-thickness <config>
-
 ```
-
-Plots thickness as `(upper − lower)` along the chord.
 
 ### Camber line
 
-```
+```bash
 openlaval plot-camber <config>
-
 ```
-
-Plots camber as `0.5 * (upper + lower)`.
 
 ### Curvature distribution
 
-```
+```bash
 openlaval plot-curvature <config>
-
 ```
-
-Plots numerical curvature for lower and upper surfaces.
 
 ### Combined curvature view
 
-```
+```bash
 openlaval plot-curvature-combined <config>
-
 ```
-
-Plots upper and lower surface curvatures in a dual-subplot layout.
 
 ### Raw vs interpolated
 
-```
+```bash
 openlaval plot-raw-vs-interp <config>
-
 ```
-
-Overlays raw MOC geometry with the interpolated contour.
 
 ### Asymmetry
 
-```
+```bash
 openlaval plot-asymmetry <config>
-
 ```
-
-Plots the deviation `(upper − lower)` to highlight asymmetric designs.
 
 ### Prandtl–Meyer diagram
 
-```
+```bash
 openlaval plot-nu <config>
-
 ```
-
-Plots the Prandtl–Meyer function with inlet and outlet Mach markers.
 
 ---
 
@@ -179,39 +151,45 @@ Plots the Prandtl–Meyer function with inlet and outlet Mach markers.
 
 ### Validate configuration
 
-```
+```bash
 openlaval validate configs/example.toml
-
 ```
 
-Checks configuration parameters and design constraints before computation.
+### Evaluate blade performance
+
+```bash
+openlaval evaluate configs/example.toml
+```
+
+### Validate against cascade data
+
+```bash
+openlaval validate-cascade configs/example.toml
+```
+
+### Automated optimization
+
+```bash
+openlaval optimize configs/example.toml
+```
 
 ### Export CAD and CFD formats
 
-```
+```bash
 openlaval export-cad configs/example.toml --outdir result/
-
 ```
-
-Exports `.dat` files and coordinate files for CAD and CFD preprocessing.
 
 ### Batch processing
 
-```
+```bash
 openlaval batch "configs/*.toml" --output-dir batch_results/
-
 ```
-
-Processes multiple TOML configuration files matching a glob pattern and outputs a consolidated summary.
 
 ### Parameter sweep
 
-```
+```bash
 openlaval sweep configs/example.toml --param mach_in --start 1.5 --end 2.5 --steps 5 --output-dir sweep_results/
-
 ```
-
-Performs parameter variation sweeps and generates a summary CSV tracking performance metrics.
 
 ---
 
@@ -219,13 +197,13 @@ Performs parameter variation sweeps and generates a summary CSV tracking perform
 
 The configuration file defines:
 
-* specific heat ratio
-* inlet and outlet Mach numbers
-* inlet flow angle
-* symmetric or asymmetric Prandtl–Meyer angles
-* leading‑edge parameters
-* number of interpolation points
-* output options (`save_fig`, `save_excel`)
+- specific heat ratio  
+- inlet and outlet Mach numbers  
+- inlet flow angle  
+- symmetric or asymmetric Prandtl–Meyer angles  
+- leading‑edge parameters  
+- number of interpolation points  
+- output options (`save_fig`, `save_excel`)  
 
 See `example.toml` for a reference.
 
@@ -233,13 +211,13 @@ See `example.toml` for a reference.
 
 ## References
 
-OpenLaval implements the design methods described in the following reports:
+OpenLaval implements the design methods described in:
 
-1. NACA RM L52B06 — Application of Supersonic Vortex‑Flow Theory to the Design of Supersonic Impulse Compressor or Turbine‑Blade Sections
-2. Design of Turbine Blades Suitable for Supersonic Relative Inlet Velocities and the Investigation of Their Performance in Cascades: Part I — Theory and Design
-3. Design of Turbine Blades Suitable for Supersonic Relative Inlet Velocities and the Investigation of Their Performance in Cascades: Part II — Experiments, Results and Discussion
-4. NASA TN D‑4421 — Analytical Investigation of Supersonic Turbomachinery Blading: I — Computer Program for Blading Design
-5. NASA TN D‑4422 — Analytical Investigation of Supersonic Turbomachinery Blading: II — Analysis of Impulse Turbine‑Blade Sections
+1. NACA RM L52B06 — Application of Supersonic Vortex‑Flow Theory to the Design of Supersonic Impulse Compressor or Turbine‑Blade Sections  
+2. Design of Turbine Blades Suitable for Supersonic Relative Inlet Velocities — Part I: Theory and Design  
+3. Design of Turbine Blades Suitable for Supersonic Relative Inlet Velocities — Part II: Experiments, Results and Discussion  
+4. NASA TN D‑4421 — Analytical Investigation of Supersonic Turbomachinery Blading: I — Computer Program for Blading Design  
+5. NASA TN D‑4422 — Analytical Investigation of Supersonic Turbomachinery Blading: II — Analysis of Impulse Turbine‑Blade Sections  
 
 ---
 
@@ -249,7 +227,4 @@ The refactored version provides a modular structure suitable for extension.
 
 Possible future additions:
 
-* **Evaluation module expansion:** Add advanced aerodynamic metrics (isentropic loss coefficients, shock losses, turning efficiency, and curvature smoothness indices) via `openlaval evaluate <config>`.
-* **Additional export formats:** Support richer CAD/CFD export types (STEP, DXF, STL, and Tecplot/Fluent formats).
-* **Validation against published cascade data:** Benchmark generated blades against historical NTRS datasets (NACA RM L52B06, NASA TN D-4421/4422) using `openlaval validate-cascade <config>`.
-* **Automated blade optimization workflows:** Couple evaluation metrics with optimization routines (like CMA-ES or differential evolution) to maximize turning or minimize losses.
+- Additional export formats: STEP, DXF, STL using libraries like `trimesh`, `CadQuery`, or `gmsh`.
