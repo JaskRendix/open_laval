@@ -23,6 +23,7 @@ from .plotting import (
     plot_raw_vs_interp,
     plot_thickness,
 )
+from .validation import validate_against_cascade
 
 app = typer.Typer(help="OpenLaval — Supersonic Impulse Turbine Blade Generator")
 
@@ -337,17 +338,27 @@ def validate_cascade_cmd(settings: str):
         blade, result = _safe_compute_blade(cfg)
         metrics = evaluate_blade_performance(result, cfg)
 
+        validation_report = validate_against_cascade(metrics)
+
         typer.echo(f"\n--- Historical Cascade Benchmark: {cfg.name} ---")
-        typer.echo(f"  Source References: NACA RM L52B06 / NASA TN D-4421/4422")
+        typer.echo(f"  Source References: {validation_report['benchmark']}")
         typer.echo(f"  Design Inlet Mach:      {cfg.mach_in:.2f}")
         typer.echo(f"  Design Outlet Mach:     {cfg.mach_out:.2f}")
+        typer.echo(f"  Estimated Turning Angle: {metrics['total_turning']:.2f}°")
         typer.echo(
-            f"  Estimated Efficiency:   {metrics['turning_efficiency'] * 100:.2f}%"
+            f"  Turning Deviation:      {validation_report['turning_deviation_deg']}°"
         )
-        typer.echo(f"  Estimated Shock Loss:   {metrics['shock_loss_coefficient']:.4f}")
         typer.echo(
-            "  Status: Benchmark metrics within acceptable supersonic envelope bounds."
+            f"  Total Loss Coefficient: {validation_report['total_loss_coefficient']:.4f}"
         )
+        typer.echo(
+            f"  Validation Status:      {'PASSED' if validation_report['passed'] else 'FAILED'}"
+        )
+        typer.echo(f"  Message:                {validation_report['message']}")
+
+        if not validation_report["passed"]:
+            raise typer.Exit(code=1)
+
     except Exception as e:
         typer.echo(f"Cascade validation failed: {e}", err=True)
         raise typer.Exit(code=1)

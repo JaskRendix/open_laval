@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import tomllib
 from typer.testing import CliRunner
 
 from openlaval.cli import app
@@ -592,8 +589,8 @@ def test_cli_validate_cascade(tmp_path):
             "nu_out": 45.20,
             "delta_nu": 19.70,
             "total_turning": 35.00,
-            "shock_loss_coefficient": 0.0210,
-            "profile_loss_coefficient": 0.0320,
+            "shock_loss_coefficient": 0.0100,
+            "profile_loss_coefficient": 0.0100,
             "turning_efficiency": 0.9450,
             "mass_flow_param_in": 1.2345,
             "mass_flow_param_out": 1.1111,
