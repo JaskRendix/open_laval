@@ -101,15 +101,21 @@ def run(
 
 @app.command()
 def batch(
-    pattern: str = typer.Argument(..., help="Glob pattern for config files, e.g., 'configs/*.toml'"),
-    output_dir: str = typer.Option("output_batch", help="Directory to save batch results"),
+    pattern: str = typer.Argument(
+        ..., help="Glob pattern for config files, e.g., 'configs/*.toml'"
+    ),
+    output_dir: str = typer.Option(
+        "output_batch", help="Directory to save batch results"
+    ),
 ):
     """
     Run a batch of configuration files and summarize their geometric metrics.
     """
     files = glob.glob(pattern)
     if not files:
-        typer.echo(f"No configuration files found matching pattern: {pattern}", err=True)
+        typer.echo(
+            f"No configuration files found matching pattern: {pattern}", err=True
+        )
         raise typer.Exit(code=1)
 
     out_path = Path(output_dir)
@@ -123,36 +129,45 @@ def batch(
         try:
             cfg = _safe_load_config(file_path)
             blade, result = _safe_compute_blade(cfg)
-            
-            summary_data.append({
-                "file": file_path,
-                "chord": result.get("chord"),
-                "max_thickness": result.get("max_thickness"),
-                "solidity": result.get("solidity"),
-            })
+
+            summary_data.append(
+                {
+                    "file": file_path,
+                    "chord": result.get("chord"),
+                    "max_thickness": result.get("max_thickness"),
+                    "solidity": result.get("solidity"),
+                }
+            )
             typer.echo(f"  [SUCCESS] {file_path}")
         except Exception as e:
             typer.echo(f"  [ERROR] {file_path}: {e}", err=True)
 
     typer.echo("\n--- Batch Summary ---")
     for item in summary_data:
-        typer.echo(f"{item['file']} -> Chord: {item['chord']:.3f}, Thick: {item['max_thickness']:.3f}, Solidity: {item['solidity']:.3f}")
+        typer.echo(
+            f"{item['file']} -> Chord: {item['chord']:.3f}, Thick: {item['max_thickness']:.3f}, Solidity: {item['solidity']:.3f}"
+        )
 
 
 @app.command("sweep")
 def sweep_cmd(
     settings: str,
-    param: str = typer.Option(..., help="Configuration parameter to sweep (e.g., 'mach_in', 'mach_out', 'beta_in')"),
+    param: str = typer.Option(
+        ...,
+        help="Configuration parameter to sweep (e.g., 'mach_in', 'mach_out', 'beta_in')",
+    ),
     start: float = typer.Option(..., help="Start value for the sweep parameter."),
     end: float = typer.Option(..., help="End value for the sweep parameter."),
     steps: int = typer.Option(5, help="Number of evaluation steps."),
-    output_dir: str = typer.Option("output_sweep", help="Directory to save sweep results and summary CSV."),
+    output_dir: str = typer.Option(
+        "output_sweep", help="Directory to save sweep results and summary CSV."
+    ),
 ):
     """
     Run an automated parameter sweep and summarize trends.
     """
     cfg = _safe_load_config(settings)
-    
+
     if not hasattr(cfg, param):
         typer.echo(f"Error: Parameter '{param}' not found in BladeConfig.", err=True)
         raise typer.Exit(code=1)
@@ -176,7 +191,9 @@ def sweep_cmd(
                 "solidity": result.get("solidity"),
             }
             sweep_results.append(row)
-            typer.echo(f"  [SUCCESS] {param} = {val:.4f} -> Chord: {row['chord']:.3f}, Solidity: {row['solidity']:.3f}")
+            typer.echo(
+                f"  [SUCCESS] {param} = {val:.4f} -> Chord: {row['chord']:.3f}, Solidity: {row['solidity']:.3f}"
+            )
         except Exception as e:
             typer.echo(f"  [ERROR] {param} = {val:.4f}: {e}", err=True)
 
@@ -295,7 +312,7 @@ def evaluate_cmd(settings: str):
     try:
         blade, result = _safe_compute_blade(cfg)
         metrics = evaluate_blade_performance(result, cfg)
-        
+
         typer.echo(f"\n--- Aerodynamic & Geometric Evaluation: {metrics['name']} ---")
         typer.echo(f"  Chord:                {metrics['chord']:.4f}")
         typer.echo(f"  Min Thickness:        {metrics['min_thickness']:.4f}")
@@ -491,9 +508,15 @@ def export_cad_cmd(settings: str, outdir: str = "result"):
     blade, result = _safe_compute_blade(cfg)
 
     try:
-        dat_path = save_cfd_dat(outdir, cfg.name, result["x"], result["lower"], result["upper"])
-        csv_path = save_csv_coordinates(outdir, cfg.name, result["x"], result["lower"], result["upper"])
-        typer.echo(f"Successfully exported CAD/CFD formats:\n  - {dat_path}\n  - {csv_path}")
+        dat_path = save_cfd_dat(
+            outdir, cfg.name, result["x"], result["lower"], result["upper"]
+        )
+        csv_path = save_csv_coordinates(
+            outdir, cfg.name, result["x"], result["lower"], result["upper"]
+        )
+        typer.echo(
+            f"Successfully exported CAD/CFD formats:\n  - {dat_path}\n  - {csv_path}"
+        )
     except Exception as e:
         typer.echo(f"Error exporting CAD files: {e}", err=True)
         raise typer.Exit(code=1)
@@ -508,7 +531,9 @@ def validate_cmd(settings: str):
     try:
         blade, result = _safe_compute_blade(cfg)
         typer.echo(f"Validation PASSED for blade: {cfg.name}")
-        typer.echo(f"  - Min Thickness: {np.min(result['upper'] - result['lower']):.4f}")
+        typer.echo(
+            f"  - Min Thickness: {np.min(result['upper'] - result['lower']):.4f}"
+        )
         typer.echo(f"  - Max Thickness: {result['max_thickness']:.4f}")
     except Exception as e:
         typer.echo(f"Validation FAILED: {e}", err=True)

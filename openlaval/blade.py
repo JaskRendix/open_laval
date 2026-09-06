@@ -223,16 +223,20 @@ class Blade:
         """
         Compute key geometric quality metrics for the blade.
         """
-        if self.x_interp is None or self.lower_interp is None or self.upper_interp is None:
+        if (
+            self.x_interp is None
+            or self.lower_interp is None
+            or self.upper_interp is None
+        ):
             return {}
 
         thickness = self.upper_interp - self.lower_interp
         max_thickness = float(np.max(thickness))
         max_thickness_loc = float(self.x_interp[np.argmax(thickness)])
-        
+
         camber = 0.5 * (self.upper_interp + self.lower_interp)
         max_camber = float(np.max(np.abs(camber)))
-        
+
         chord = float(self.x_interp[-1] - self.x_interp[0])
 
         return {
@@ -250,7 +254,7 @@ class Blade:
         self.generate_geometry()
         self.interpolate()
         self.compute_solidity()
-        
+
         # Ensure upper is strictly above lower to prevent negative thickness from minor floating-point artifacts
         if self.upper_interp is not None and self.lower_interp is not None:
             self.upper_interp = np.maximum(self.upper_interp, self.lower_interp + 1e-4)

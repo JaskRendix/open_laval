@@ -229,20 +229,22 @@ def plot_raw_vs_interp(
         plt.show()
 
 
-def plot_combined_curvature(x_lower, y_lower, x_upper, y_upper, title="Blade Curvature", save_path=None):
+def plot_combined_curvature(
+    x_lower, y_lower, x_upper, y_upper, title="Blade Curvature", save_path=None
+):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
     dx_l = np.gradient(x_lower)
     dy_l = np.gradient(y_lower)
     ddx_l = np.gradient(dx_l)
     ddy_l = np.gradient(dy_l)
-    curv_lower = (dx_l * ddy_l - dy_l * ddx_l) / (dx_l**2 + dy_l**2)**1.5
+    curv_lower = (dx_l * ddy_l - dy_l * ddx_l) / (dx_l**2 + dy_l**2) ** 1.5
 
     dx_u = np.gradient(x_upper)
     dy_u = np.gradient(y_upper)
     ddx_u = np.gradient(dx_u)
     ddy_u = np.gradient(dy_u)
-    curv_upper = (dx_u * ddy_u - dy_u * ddx_u) / (dx_u**2 + dy_u**2)**1.5
+    curv_upper = (dx_u * ddy_u - dy_u * ddx_u) / (dx_u**2 + dy_u**2) ** 1.5
 
     ax1.plot(x_lower, curv_lower, color="tab:blue", lw=2)
     ax1.set_title("Lower Surface Curvature")

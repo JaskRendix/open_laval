@@ -13,7 +13,9 @@ def ensure_dir(path: str | Path) -> Path:
     return path
 
 
-def save_contour_csv(path: str | Path, x: np.ndarray, lower: np.ndarray, upper: np.ndarray) -> None:
+def save_contour_csv(
+    path: str | Path, x: np.ndarray, lower: np.ndarray, upper: np.ndarray
+) -> None:
     """
     Save interpolated blade contour to CSV.
     """
@@ -27,7 +29,9 @@ def save_contour_csv(path: str | Path, x: np.ndarray, lower: np.ndarray, upper: 
     df.to_csv(path, index=False)
 
 
-def save_contour_excel(path: str | Path, x: np.ndarray, lower: np.ndarray, upper: np.ndarray) -> None:
+def save_contour_excel(
+    path: str | Path, x: np.ndarray, lower: np.ndarray, upper: np.ndarray
+) -> None:
     """
     Save interpolated blade contour to Excel.
     """
@@ -42,11 +46,11 @@ def save_contour_excel(path: str | Path, x: np.ndarray, lower: np.ndarray, upper
 
 
 def save_raw_geometry(
-    path: str | Path, 
-    lower_x: np.ndarray, 
-    lower_y: np.ndarray, 
-    upper_x: np.ndarray, 
-    upper_y: np.ndarray
+    path: str | Path,
+    lower_x: np.ndarray,
+    lower_y: np.ndarray,
+    upper_x: np.ndarray,
+    upper_y: np.ndarray,
 ) -> None:
     """
     Save raw (non-interpolated) blade geometry.
@@ -71,11 +75,11 @@ def save_metadata(path: str | Path, metadata: dict) -> None:
 
 
 def save_cfd_dat(
-    outdir: str | Path, 
-    name: str, 
-    x_interp: np.ndarray, 
-    lower_interp: np.ndarray, 
-    upper_interp: np.ndarray
+    outdir: str | Path,
+    name: str,
+    x_interp: np.ndarray,
+    lower_interp: np.ndarray,
+    upper_interp: np.ndarray,
 ) -> Path:
     """
     Export blade profile in standard .dat format (useful for CFD grids/solvers like SU2/ANSYS).
@@ -88,11 +92,11 @@ def save_cfd_dat(
         f.write(f'Title="OpenLaval Blade Profile: {name}"\n')
         f.write("Variables=X, Y\n")
         f.write(f'Zone T="Blade", I={len(x_interp) * 2}\n')
-        
+
         # Write upper surface (from trailing edge to leading edge)
         for x_val, y_val in zip(reversed(x_interp), reversed(upper_interp)):
             f.write(f"{x_val:.6f} {y_val:.6f}\n")
-            
+
         # Write lower surface (from leading edge to trailing edge)
         for x_val, y_val in zip(x_interp, lower_interp):
             f.write(f"{x_val:.6f} {y_val:.6f}\n")
@@ -101,28 +105,30 @@ def save_cfd_dat(
 
 
 def save_csv_coordinates(
-    outdir: str | Path, 
-    name: str, 
-    x_interp: np.ndarray, 
-    lower_interp: np.ndarray, 
-    upper_interp: np.ndarray
+    outdir: str | Path,
+    name: str,
+    x_interp: np.ndarray,
+    lower_interp: np.ndarray,
+    upper_interp: np.ndarray,
 ) -> Path:
     """
     Export separate structured CSV file with comprehensive points, thickness, and camber.
     """
     out_path = ensure_dir(outdir)
     file_path = out_path / f"{name}_coordinates.csv"
-    
+
     thickness = upper_interp - lower_interp
     camber = 0.5 * (upper_interp + lower_interp)
-    
-    df = pd.DataFrame({
-        "x": x_interp,
-        "y_lower": lower_interp,
-        "y_upper": upper_interp,
-        "thickness": thickness,
-        "camber": camber,
-    })
+
+    df = pd.DataFrame(
+        {
+            "x": x_interp,
+            "y_lower": lower_interp,
+            "y_upper": upper_interp,
+            "thickness": thickness,
+            "camber": camber,
+        }
+    )
     df.to_csv(file_path, index=False)
     return file_path
 

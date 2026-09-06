@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import numpy as np
 import pytest
-from unittest.mock import MagicMock
 
 from openlaval.evaluation import evaluate_blade_performance
 

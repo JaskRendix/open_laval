@@ -3,18 +3,18 @@ import pytest
 
 from openlaval.physics import (
     Kstar_max,
+    compute_isentropic_pressure_coef,
+    compute_turning_angles,
     mach_after_edge,
     mach_from_prandtl,
     mach_to_mstar,
+    mass_flow_parameter,
     mstar_to_mach,
     phi_Rstar,
     prandtl_meyer,
     vl_minimum,
     vortex_C,
     vortex_Q,
-    mass_flow_parameter,
-    compute_turning_angles,
-    compute_isentropic_pressure_coef,
 )
 
 GAMMA = 1.4
@@ -99,12 +99,12 @@ def test_compute_turning_angles():
     M_in = 1.8
     M_out = 2.2
     turning = compute_turning_angles(beta_in, M_in, M_out, GAMMA)
-    
+
     assert "nu_in" in turning
     assert "nu_out" in turning
     assert "delta_nu" in turning
     assert "total_turning" in turning
-    
+
     assert turning["delta_nu"] > 0
     assert turning["total_turning"] > beta_in
 

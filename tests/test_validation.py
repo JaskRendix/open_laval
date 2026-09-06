@@ -13,13 +13,13 @@ def naca_l52b06_baseline_config() -> BladeConfig:
     gamma = 1.4
     mach_in = 1.57
     mach_out = 1.67  # Slight expansion to create a valid Prandtl-Meyer band
-    
+
     nu_in = float(prandtl_meyer(mach_in, gamma))
     nu_out = float(prandtl_meyer(mach_out, gamma))
-    
+
     nu_min = min(nu_in, nu_out)
     nu_max = max(nu_in, nu_out)
-    
+
     return BladeConfig(
         name="naca_l52b06_baseline",
         gamma=gamma,
@@ -63,10 +63,10 @@ def test_validation_naca_baseline_metrics(naca_l52b06_baseline_config):
 def test_validation_parametric_trends(mach_in, beta_in, expected_min_turning):
     gamma = 1.4
     mach_out = mach_in + 0.1
-    
+
     nu_in = float(prandtl_meyer(mach_in, gamma))
     nu_out = float(prandtl_meyer(mach_out, gamma))
-    
+
     nu_min = min(nu_in, nu_out)
     nu_max = max(nu_in, nu_out)
 

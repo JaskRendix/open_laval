@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -44,7 +45,12 @@ def sample_arrays():
         ),
         (
             plotting.plot_combined_curvature,
-            (np.linspace(0, 1, 10), np.sin(np.linspace(0, 1, 10)), np.linspace(0, 1, 10), np.cos(np.linspace(0, 1, 10))),
+            (
+                np.linspace(0, 1, 10),
+                np.sin(np.linspace(0, 1, 10)),
+                np.linspace(0, 1, 10),
+                np.cos(np.linspace(0, 1, 10)),
+            ),
         ),
         (plotting.plot_asymmetry, (np.arange(5), np.zeros(5), np.ones(5))),
     ],
@@ -81,7 +87,12 @@ def test_plot_functions_no_save(func, args, tmp_path):
         ),
         (
             plotting.plot_combined_curvature,
-            (np.linspace(0, 1, 10), np.sin(np.linspace(0, 1, 10)), np.linspace(0, 1, 10), np.cos(np.linspace(0, 1, 10))),
+            (
+                np.linspace(0, 1, 10),
+                np.sin(np.linspace(0, 1, 10)),
+                np.linspace(0, 1, 10),
+                np.cos(np.linspace(0, 1, 10)),
+            ),
             "combined_curv.png",
         ),
         (plotting.plot_asymmetry, (np.arange(5), np.zeros(5), np.ones(5)), "asym.png"),

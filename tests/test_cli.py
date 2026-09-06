@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
-import numpy as np
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import numpy as np
 import tomllib
 from typer.testing import CliRunner
 
@@ -427,7 +427,9 @@ def test_cli_batch(tmp_path):
         MockBlade.return_value = mock_blade
 
         pattern = str(tmp_path / "*.toml")
-        result = runner.invoke(app, ["batch", pattern, "--output-dir", str(tmp_path / "batch_out")])
+        result = runner.invoke(
+            app, ["batch", pattern, "--output-dir", str(tmp_path / "batch_out")]
+        )
 
     assert result.exit_code == 0
     assert "Batch Summary" in result.stdout
@@ -485,7 +487,9 @@ def test_cli_export_cad(tmp_path):
         }
         MockBlade.return_value = mock_blade
 
-        result = runner.invoke(app, ["export-cad", str(cfg_path), "--outdir", str(tmp_path)])
+        result = runner.invoke(
+            app, ["export-cad", str(cfg_path), "--outdir", str(tmp_path)]
+        )
 
     assert result.exit_code == 0
     mock_dat.assert_called_once()
