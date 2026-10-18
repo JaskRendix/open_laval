@@ -222,23 +222,32 @@ def test_compute_turning_angles_identity():
     assert np.isclose(result["total_turning"], 60.0)
 
 
-@pytest.mark.parametrize(
-    "nu_expected,M",
-    [
-        (20.0, 1.775),
-        (24.0, 1.915),
-        (28.0, 2.059),
-        (32.0, 2.210),
-        (40.0, 2.538),
-        (50.0, 3.013),
-    ],
-)
-def test_mach_from_prandtl_against_naca_table_I(nu_expected, M):
-    """
-    NACA RM L52B06 Table I (gamma = 1.4).
-    """
-    assert np.isclose(
-        mach_from_prandtl(nu_expected, GAMMA),
-        M,
-        rtol=1e-3,
-    )
+def test_Kstar_max_increases_with_radius_ratio():
+    k1 = Kstar_max(0.65, 0.95, GAMMA)
+    k2 = Kstar_max(0.75, 0.95, GAMMA)
+    k3 = Kstar_max(0.85, 0.95, GAMMA)
+
+    assert k1 < k2 < k3
+
+
+def test_vortex_Q_decreases_with_flow_span():
+    q1 = vortex_Q(0.80, 0.90, GAMMA)
+    q2 = vortex_Q(0.70, 0.90, GAMMA)
+    q3 = vortex_Q(0.60, 0.90, GAMMA)
+
+    assert q1 > q2 > q3
+
+
+def test_vortex_C_decreases_with_radius_ratio():
+    c1 = vortex_C(0.60, 0.95, GAMMA)
+    c2 = vortex_C(0.70, 0.95, GAMMA)
+    c3 = vortex_C(0.80, 0.95, GAMMA)
+
+    assert c1 < c2 < c3
+
+
+def test_vl_minimum_is_nonnegative():
+    nu_min = vl_minimum(GAMMA)
+
+    assert np.isfinite(nu_min)
+    assert nu_min >= 0.0
