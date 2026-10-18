@@ -213,11 +213,20 @@ See `example.toml` for a reference.
 
 OpenLaval implements the design methods described in:
 
-1. NACA RM L52B06 — Application of Supersonic Vortex‑Flow Theory to the Design of Supersonic Impulse Compressor or Turbine‑Blade Sections  
-2. Design of Turbine Blades Suitable for Supersonic Relative Inlet Velocities — Part I: Theory and Design  
-3. Design of Turbine Blades Suitable for Supersonic Relative Inlet Velocities — Part II: Experiments, Results and Discussion  
-4. NASA TN D‑4421 — Analytical Investigation of Supersonic Turbomachinery Blading: I — Computer Program for Blading Design  
-5. NASA TN D‑4422 — Analytical Investigation of Supersonic Turbomachinery Blading: II — Analysis of Impulse Turbine‑Blade Sections  
+1. Boxer, E., Sterrett, J. R., & Wlodarski, J. (1952). *Application of Supersonic Vortex-Flow Theory to the Design of Supersonic Impulse Compressor- or Turbine-Blade Sections* (NACA RM L52B06). National Advisory Committee for Aeronautics.  
+   https://ntrs.nasa.gov/citations/19930087012
+
+2. Colclough, C. D. (1966). *Design of Turbine Blades Suitable for Supersonic Relative Inlet Velocities and the Investigation of Their Performance in Cascades: Part I – Theory and Design*. Journal of Mechanical Engineering Science, 8(1).  
+   https://doi.org/10.1243/JMES_JOUR_1966_008_015_02
+
+3. Colclough, C. D. (1966). *Design of Turbine Blades Suitable for Supersonic Relative Inlet Velocities and the Investigation of Their Performance in Cascades: Part II – Experiments, Results and Discussion*. Journal of Mechanical Engineering Science, 8(2).  
+   https://doi.org/10.1243/JMES_JOUR_1966_008_023_02
+
+4. Goldman, L. J., & Scullin, V. J. (1968). *Analytical Investigation of Supersonic Turbomachinery Blading: I – Computer Program for Blading Design* (NASA TN D-4421). NASA Lewis Research Center.  
+   https://ntrs.nasa.gov/citations/19680009151
+
+5. Goldman, L. J. (1968). *Analytical Investigation of Supersonic Turbomachinery Blading: II – Analysis of Impulse Turbine-Blade Sections* (NASA TN D-4422). NASA Lewis Research Center.  
+   https://ntrs.nasa.gov/citations/19680010807
 
 ---
 
