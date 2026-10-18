@@ -16,8 +16,6 @@ This repository is a refactored and modular version of the original project publ
 - Circular arcs, concave/convex transitions, and leading‑edge shaping  
 - Interpolated blade contour suitable for CAD or CFD preprocessing  
 - Aerodynamic performance evaluation (isentropic loss coefficients, shock losses, turning efficiency, curvature smoothness)  
-- Benchmarking and validation against historical NTRS cascade datasets  
-  (NACA RM L52B06, NASA TN D‑4421/4422)  
 - Automated blade performance optimization workflows using `scipy.optimize`  
 - Export of geometry, metadata, and CSV files  
 - Export of CAD/CFD formats (`.dat` and coordinate CSVs)  
@@ -159,12 +157,6 @@ openlaval validate configs/example.toml
 
 ```bash
 openlaval evaluate configs/example.toml
-```
-
-### Validate against cascade data
-
-```bash
-openlaval validate-cascade configs/example.toml
 ```
 
 ### Automated optimization

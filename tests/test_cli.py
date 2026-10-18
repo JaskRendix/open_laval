@@ -559,51 +559,6 @@ def test_cli_evaluate(tmp_path):
     assert "Turning Efficiency:" in result.stdout
 
 
-def test_cli_validate_cascade(tmp_path):
-    cfg_path = write_config(tmp_path)
-
-    with (
-        patch("openlaval.cli._safe_load_config") as mock_load,
-        patch("openlaval.cli._safe_compute_blade") as mock_compute,
-        patch("openlaval.cli.evaluate_blade_performance") as mock_eval,
-    ):
-        mock_cfg = MagicMock()
-        mock_cfg.name = "testblade"
-        mock_cfg.mach_in = 2.0
-        mock_cfg.mach_out = 1.5
-        mock_load.return_value = mock_cfg
-
-        mock_blade = MagicMock()
-        mock_result = {"x": [0, 1], "lower": [0, -1], "upper": [1, 2]}
-        mock_compute.return_value = (mock_blade, mock_result)
-
-        mock_eval.return_value = {
-            "name": "testblade",
-            "chord": 1.0000,
-            "min_thickness": 0.0500,
-            "max_thickness": 0.2000,
-            "solidity": 0.7500,
-            "upper_curvature_smoothness": 0.0123,
-            "lower_curvature_smoothness": 0.0145,
-            "nu_in": 25.50,
-            "nu_out": 45.20,
-            "delta_nu": 19.70,
-            "total_turning": 35.00,
-            "shock_loss_coefficient": 0.0100,
-            "profile_loss_coefficient": 0.0100,
-            "turning_efficiency": 0.9450,
-            "mass_flow_param_in": 1.2345,
-            "mass_flow_param_out": 1.1111,
-            "isentropic_cp_est": 0.8500,
-        }
-
-        result = runner.invoke(app, ["validate-cascade", str(cfg_path)])
-
-    assert result.exit_code == 0
-    assert "Historical Cascade Benchmark: testblade" in result.stdout
-    assert "NACA RM L52B06" in result.stdout
-
-
 def test_cli_optimize(tmp_path):
     cfg_path = write_config(tmp_path)
 

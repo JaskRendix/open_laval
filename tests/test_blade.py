@@ -243,18 +243,30 @@ def test_asymmetric_flow_relations_rstar_differs():
     assert 0 < blade.Rstar_upper < 1
 
 
-def test_asymmetric_geometry_differs():
-    cfg = make_cfg(
-        asymmetric=True,
-        vl_lower=12.5,
-        vl_upper=13.5,
-        vu_lower=20.0,
-        vu_upper=23.0,
-    )
-    blade = Blade(cfg)
-    blade.compute()
+def test_asymmetric_changes_geometry():
+    symmetric = Blade(make_cfg())
+    symmetric.compute()
 
-    assert not np.allclose(blade.lower_interp, blade.upper_interp)
+    asymmetric = Blade(
+        make_cfg(
+            asymmetric=True,
+            vl_lower=12.5,
+            vl_upper=13.5,
+            vu_lower=20.0,
+            vu_upper=23.0,
+        )
+    )
+    asymmetric.compute()
+
+    assert not np.allclose(
+        symmetric.lower_interp,
+        asymmetric.lower_interp,
+    )
+
+    assert not np.allclose(
+        symmetric.upper_interp,
+        asymmetric.upper_interp,
+    )
 
 
 def test_asymmetric_pipeline_runs():
@@ -270,3 +282,30 @@ def test_asymmetric_pipeline_runs():
 
     assert result["x"].size == cfg.num_points
     assert np.isfinite(result["solidity"])
+
+
+def test_positive_blade_thickness():
+    cfg = make_cfg()
+    blade = Blade(cfg)
+
+    result = blade.compute()
+
+    thickness = result["upper"] - result["lower"]
+
+    assert np.all(thickness > 0)
+
+
+def test_compute_metrics_sanity():
+    cfg = make_cfg()
+
+    blade = Blade(cfg)
+    blade.compute()
+
+    metrics = blade.compute_metrics()
+
+    assert metrics["chord"] > 0
+    assert metrics["max_thickness"] > 0
+
+    assert blade.x_interp[0] <= metrics["max_thickness_location"] <= blade.x_interp[-1]
+
+    assert np.isfinite(metrics["max_camber"])

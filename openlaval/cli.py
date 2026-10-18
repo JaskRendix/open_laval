@@ -24,7 +24,6 @@ from .plotting import (
     plot_raw_vs_interp,
     plot_thickness,
 )
-from .validation import validate_against_cascade
 
 app = typer.Typer(help="OpenLaval — Supersonic Impulse Turbine Blade Generator")
 
@@ -364,42 +363,6 @@ def evaluate_cmd(settings: str):
         typer.echo(f"  Isentropic Cp (Est):    {metrics['isentropic_cp_est']:.4f}")
     except Exception as e:
         typer.echo(f"Evaluation failed: {e}", err=True)
-        raise typer.Exit(code=1)
-
-
-@app.command("validate-cascade")
-def validate_cascade_cmd(settings: str):
-    """
-    Validate generated blade performance against historical NTRS cascade datasets.
-    """
-    cfg = _safe_load_config(settings)
-    try:
-        blade, result = _safe_compute_blade(cfg)
-        metrics = evaluate_blade_performance(result, cfg)
-
-        validation_report = validate_against_cascade(metrics)
-
-        typer.echo(f"\n--- Historical Cascade Benchmark: {cfg.name} ---")
-        typer.echo(f"  Source References: {validation_report['benchmark']}")
-        typer.echo(f"  Design Inlet Mach:      {cfg.mach_in:.2f}")
-        typer.echo(f"  Design Outlet Mach:     {cfg.mach_out:.2f}")
-        typer.echo(f"  Estimated Turning Angle: {metrics['total_turning']:.2f}°")
-        typer.echo(
-            f"  Turning Deviation:      {validation_report['turning_deviation_deg']}°"
-        )
-        typer.echo(
-            f"  Total Loss Coefficient: {validation_report['total_loss_coefficient']:.4f}"
-        )
-        typer.echo(
-            f"  Validation Status:      {'PASSED' if validation_report['passed'] else 'FAILED'}"
-        )
-        typer.echo(f"  Message:                {validation_report['message']}")
-
-        if not validation_report["passed"]:
-            raise typer.Exit(code=1)
-
-    except Exception as e:
-        typer.echo(f"Cascade validation failed: {e}", err=True)
         raise typer.Exit(code=1)
 
 
