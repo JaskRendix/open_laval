@@ -144,3 +144,101 @@ def test_prandtl_meyer_reference():
         26.3797608,
         atol=1e-5,
     )
+
+
+@pytest.mark.parametrize(
+    "nu_expected,M",
+    [
+        (20.0, 1.775),
+        (24.0, 1.915),
+        (28.0, 2.059),
+        (32.0, 2.210),
+        (40.0, 2.538),
+        (50.0, 3.013),
+    ],
+)
+def test_prandtl_meyer_against_naca_table_I(nu_expected, M):
+    """
+    NACA RM L52B06 Table I (γ = 1.4).
+    """
+    assert np.isclose(
+        prandtl_meyer(M, GAMMA),
+        nu_expected,
+        atol=0.1,
+    )
+
+
+@pytest.mark.parametrize(
+    "nu_expected,M",
+    [
+        (20.0, 1.775),
+        (24.0, 1.915),
+        (28.0, 2.059),
+        (32.0, 2.210),
+        (40.0, 2.538),
+        (50.0, 3.013),
+    ],
+)
+def test_mach_from_prandtl_against_naca_table_I(nu_expected, M):
+    assert np.isclose(
+        mach_from_prandtl(nu_expected, GAMMA),
+        M,
+        rtol=1e-3,
+    )
+
+
+def test_mach_after_edge_zero_turn():
+    M = 2.0
+
+    assert np.isclose(
+        mach_after_edge(M, 0.0, GAMMA),
+        M,
+        atol=1e-8,
+    )
+
+
+def test_mach_after_edge_matches_prandtl_meyer_increment():
+    M1 = 2.0
+    dnu = 5.0
+
+    M2 = mach_after_edge(M1, dnu, GAMMA)
+
+    assert np.isclose(
+        prandtl_meyer(M2, GAMMA),
+        prandtl_meyer(M1, GAMMA) + dnu,
+        atol=1e-4,
+    )
+
+
+def test_compute_turning_angles_identity():
+    result = compute_turning_angles(
+        beta_in_deg=60.0,
+        M_in=2.0,
+        M_out=2.0,
+        gamma=GAMMA,
+    )
+
+    assert np.isclose(result["delta_nu"], 0.0)
+    assert np.isclose(result["total_turning"], 60.0)
+
+
+@pytest.mark.parametrize(
+    "nu_expected,M",
+    [
+        (20.0, 1.775),
+        (24.0, 1.915),
+        (28.0, 2.059),
+        (32.0, 2.210),
+        (40.0, 2.538),
+        (50.0, 3.013),
+    ],
+)
+def test_mach_from_prandtl_against_naca_table_I(nu_expected, M):
+    """
+    NACA RM L52B06 Table I (gamma = 1.4).
+    """
+    assert np.isclose(
+        mach_from_prandtl(nu_expected, GAMMA),
+        M,
+        rtol=1e-3,
+    )

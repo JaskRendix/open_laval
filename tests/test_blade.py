@@ -309,3 +309,25 @@ def test_compute_metrics_sanity():
     assert blade.x_interp[0] <= metrics["max_thickness_location"] <= blade.x_interp[-1]
 
     assert np.isfinite(metrics["max_camber"])
+
+
+def test_symmetric_pm_angles_match():
+    cfg = make_cfg(asymmetric=False)
+
+    blade = Blade(cfg)
+    blade.compute_flow_relations()
+
+    assert blade.vl_lower == blade.vl_upper
+    assert blade.vu_lower == blade.vu_upper
+
+
+def test_full_pipeline_metrics_are_physical():
+    cfg = make_cfg()
+
+    blade = Blade(cfg)
+    result = blade.compute()
+
+    assert result["chord"] > 0
+    assert result["max_thickness"] > 0
+
+    assert result["x"][0] <= result["max_thickness_location"] <= result["x"][-1]
