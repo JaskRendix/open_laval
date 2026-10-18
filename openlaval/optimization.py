@@ -41,9 +41,7 @@ def optimize_blade_performance(
     else:
         opt_options["xatol"] = 1e-3
 
-    res = minimize(
-        objective, initial_x, method=method, options=opt_options
-    )
+    res = minimize(objective, initial_x, method=method, options=opt_options)
 
     optimized_values = {var: val for var, val in zip(design_vars, res.x)}
     for var, val in optimized_values.items():

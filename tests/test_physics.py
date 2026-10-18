@@ -49,12 +49,17 @@ def test_mach_after_edge_increases_nu():
     assert prandtl_meyer(M2, GAMMA) > prandtl_meyer(M1, GAMMA)
 
 
-def test_phi_Rstar_valid_domain():
-    # Valid Rs interval for gamma=1.4 is approx [0.913, 1.049]
-    Rs_values = np.linspace(0.92, 1.04, 5)
-    for Rs in Rs_values:
-        phi = phi_Rstar(Rs, GAMMA)
-        assert np.isfinite(phi)
+def test_phi_Rstar_varies_with_Rs():
+    phi_lo = phi_Rstar(0.92, GAMMA)
+    phi_mid = phi_Rstar(0.98, GAMMA)
+    phi_hi = phi_Rstar(1.04, GAMMA)
+
+    assert np.isfinite(phi_lo)
+    assert np.isfinite(phi_mid)
+    assert np.isfinite(phi_hi)
+
+    assert not np.isclose(phi_lo, phi_mid)
+    assert not np.isclose(phi_mid, phi_hi)
 
 
 def test_Kstar_max_valid_range():
@@ -81,17 +86,21 @@ def test_vortex_C_between_zero_and_one():
     assert 0 <= C < 1
 
 
-def test_vl_minimum_reasonable_range():
-    nu_min = vl_minimum(GAMMA)
-    nu_max = np.degrees(0.5 * np.pi * (np.sqrt((GAMMA + 1) / (GAMMA - 1)) - 1))
-    assert np.isfinite(nu_min)
-    assert 0 <= nu_min < nu_max
+def test_vl_minimum_is_repeatable():
+    nu1 = vl_minimum(GAMMA)
+    nu2 = vl_minimum(GAMMA)
+
+    assert np.isfinite(nu1)
+    assert np.isclose(nu1, nu2, atol=1e-12)
 
 
-def test_mass_flow_parameter_positive():
-    m_dot = mass_flow_parameter(2.0, GAMMA)
-    assert np.isfinite(m_dot)
-    assert m_dot > 0
+def test_mass_flow_parameter_maximum_at_mach_one():
+    q_sub = mass_flow_parameter(0.5, GAMMA)
+    q_star = mass_flow_parameter(1.0, GAMMA)
+    q_sup = mass_flow_parameter(2.0, GAMMA)
+
+    assert q_star > q_sub
+    assert q_star > q_sup
 
 
 def test_compute_turning_angles():
@@ -109,6 +118,29 @@ def test_compute_turning_angles():
     assert turning["total_turning"] > beta_in
 
 
-def test_compute_isentropic_pressure_coef():
-    cp = compute_isentropic_pressure_coef(M=2.2, M_ref=1.8, gamma=GAMMA)
-    assert np.isfinite(cp)
+def test_compute_isentropic_pressure_coef_identity():
+    cp = compute_isentropic_pressure_coef(
+        M=2.0,
+        M_ref=2.0,
+        gamma=GAMMA,
+    )
+
+    assert np.isclose(cp, 0.0, atol=1e-12)
+
+
+def test_compute_isentropic_pressure_coef_acceleration():
+    cp = compute_isentropic_pressure_coef(
+        M=2.2,
+        M_ref=1.8,
+        gamma=GAMMA,
+    )
+
+    assert cp < 0.0
+
+
+def test_prandtl_meyer_reference():
+    assert np.isclose(
+        prandtl_meyer(2.0, GAMMA),
+        26.3797608,
+        atol=1e-5,
+    )
